@@ -13,7 +13,7 @@ export const login = async (
     return response.data;
   } catch (error: any) {
     const msg = error?.response?.data?.msg || "Login faild";
-    throw new Error();
+    throw new Error(msg);
   }
 };
 
@@ -21,18 +21,18 @@ export const register = async (
   email: string,
   password: string,
   name: string,
-  avatar?: string| null
+  avatar?: string | null
 ): Promise<{ token: string }> => {
   try {
     const response = await axios.post(`${API_URL}/auth/register`, {
       email,
       password,
       name,
-      avatar, 
+      avatar,
     });
     return response.data;
   } catch (error: any) {
     const msg = error?.response?.data?.msg || "Register faild";
-    throw new Error();
+    throw new Error(msg);
   }
 };

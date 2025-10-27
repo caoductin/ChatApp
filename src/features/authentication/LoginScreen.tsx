@@ -58,10 +58,10 @@ const Login = () => {
           >
             <Button onPress={handleLogin}>
               <Typo fontWeight={"700"} size={16}>
-                Sign up
+                Login
               </Typo>
             </Button>
-            <LoginFooter gotoRegister={gotoRegister} />;
+            <LoginFooter gotoRegister={gotoRegister} />
           </View>
         </ScrollView>
       </View>
@@ -72,6 +72,7 @@ const Login = () => {
 interface LoginFooterProps {
   gotoRegister: () => void;
 }
+
 const LoginFooter: FC<LoginFooterProps> = ({ gotoRegister }) => {
   return (
     <Typo style={{ textAlign: "center" }}>

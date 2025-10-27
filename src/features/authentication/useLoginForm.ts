@@ -1,5 +1,7 @@
+import { useAuth } from "@/context/authContext";
 import { router, useNavigation } from "expo-router";
 import { useCallback, useState } from "react";
+import { Alert } from "react-native";
 
 export interface LoginProps {
   email?: string;
@@ -7,9 +9,11 @@ export interface LoginProps {
 }
 
 export const useLoginForm = () => {
+  const { signIn, isLogin } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<LoginProps>();
+  const [isLoading, setLoading] = useState(false);
   const navigation = useNavigation();
 
   const validateLogin = useCallback(() => {
@@ -24,9 +28,16 @@ export const useLoginForm = () => {
     return error && Object.keys(error).length === 0;
   }, [email, password]);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (validateLogin()) {
-      router.navigate("/(main)/home");
+      try {
+        setLoading(true);
+        await signIn(email, password);
+      } catch (er: any) {
+        Alert.alert("Login failed", er.message);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -41,6 +52,7 @@ export const useLoginForm = () => {
 
   return {
     error,
+    isLoading,
     setError,
     email,
     setEmail,

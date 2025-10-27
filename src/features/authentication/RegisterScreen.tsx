@@ -1,34 +1,21 @@
-import BackButton from "@/src/components/BackButton";
+import { colors, spacingX } from "@/constants/theme";
 import Button from "@/src/components/Button";
 import ScreenWrapper from "@/src/components/ScreenWrapper";
 import Typo from "@/src/components/Typo";
-import { colors, radius, spacingX } from "@/constants/theme";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { router, useRouter } from "expo-router";
+import { FC } from "react";
 import {
-  ComponentProps,
-  FC,
-  useCallback,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
-import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
-  TextInputProps,
   View,
 } from "react-native";
 import Animated from "react-native-reanimated";
-import useRegisterForm from "./useRegisterForm";
-import { FormField } from "./components/TextField";
 import { RegisterHeader } from "./components/RegisterHeader";
 import { RegisterWelcome } from "./components/RegisterWelcome";
+import { FormField } from "./components/TextField";
+import useRegisterForm from "./useRegisterForm";
 
 const Register = () => {
   const {

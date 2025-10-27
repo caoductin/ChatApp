@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert } from "react-native";
 import { LoginProps } from "./useLoginForm";
+import { useAuth } from "@/context/authContext";
 
 interface RegisterProps extends LoginProps {
   name?: string;
@@ -12,7 +13,9 @@ const useRegisterForm = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState<RegisterProps>({});
+  const [isloading, setLoading] = useState(false);
   const router = useRouter();
+  const { signUp } = useAuth();
 
   const validDate = useCallback(() => {
     const newErrors: Record<string, string> = {};
@@ -32,9 +35,16 @@ const useRegisterForm = () => {
     return Object.keys(newErrors).length === 0;
   }, [name, email, password]);
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (validDate()) {
-      Alert.alert("Success", "You have been login");
+      try {
+        setLoading(true);
+        await signUp(email, password, name);
+      } catch (err: any) {
+        Alert.alert("Faild", err.message);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
