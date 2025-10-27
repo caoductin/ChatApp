@@ -1,8 +1,8 @@
 import HomeScreen from "@/src/features/home/HomeScreen";
 import { View, Text } from "react-native";
 
-const Home = () => {
-  return <HomeScreen />;
+const Status = () => {
+  return <Text>cao duc oiti</Text>;
 };
 
-export default Home;
+export default Status;
