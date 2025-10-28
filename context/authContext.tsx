@@ -1,7 +1,6 @@
 import { AuthContextProps, DecodedTokenProps, UserProps } from "@/types";
 import { useRouter } from "expo-router";
 import { createContext, ReactNode, use, useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
 import { login, register } from "@/services/authServies";
 import { storage } from "@/storage";
@@ -22,12 +21,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserProps | null>(null);
   const router = useRouter();
 
-  // useEffect(() => {
-  //   const token = storage.getString("token");
-  //   if (token) {
-  //     setIsLogin(true);
-  //   }
-  // }, []); 
+  useEffect(() => {
+    const token = storage.getString("token");
+    if (token) {
+      setIsLogin(true);
+    }
+  }, []);
 
   const updateToken = async (token: string) => {
     if (token) {
@@ -61,6 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setToken(null);
     setIsLogin(false);
+    storage.clearAll();
     router.replace("/(auth)/login");
   };
 

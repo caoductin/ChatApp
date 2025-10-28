@@ -1,20 +1,17 @@
 import { AuthProvider, useAuth } from "@/context/authContext";
-import { NavigationContainer } from "@react-navigation/native";
-import { Stack, Tabs } from "expo-router";
+import { ThemeProvider } from "@/context/themeContext";
+import { login } from "@/services/authServies";
+import { Stack } from "expo-router";
 
 const StackLayout = () => {
-  // const { isLogin } = useAuth();
-  // console.log("this is login", isLogin);
-  const isLogin = true;
+  const { isLogin } = useAuth();
+  // const isLogin = true;
+  console.log("this is log inb", isLogin);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={isLogin}>
         <Stack.Screen name="(main)/home" />
-        {/* <Tabs>
-          <Tabs.Screen name="(main)/home" options={{ title: "Home" }} />
-          <Tabs.Screen name="(main)/call" options={{ title: "call" }} />
-        </Tabs> */}
       </Stack.Protected>
       <Stack.Protected guard={!isLogin}>
         <Stack.Screen name="(auth)/login" />
@@ -28,9 +25,11 @@ const StackLayout = () => {
 
 const RootLayout = () => {
   return (
-    <AuthProvider>
-      <StackLayout />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <StackLayout />
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

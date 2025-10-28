@@ -29,16 +29,16 @@ export const useLoginForm = () => {
   }, [email, password]);
 
   const handleLogin = async () => {
-    if (validateLogin()) {
-      try {
-        setLoading(true);
-        await signIn(email, password);
-      } catch (er: any) {
-        Alert.alert("Login failed", er.message);
-      } finally {
-        setLoading(false);
-      }
+    // if (validateLogin()) {
+    try {
+      setLoading(true);
+      await signIn(email, password);
+    } catch (er: any) {
+      Alert.alert("Login failed", er.message);
+    } finally {
+      setLoading(false);
     }
+    // }
   };
 
   const gotoRegister = () => {
