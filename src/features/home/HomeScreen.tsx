@@ -1,21 +1,21 @@
+import { testSocket } from "@/socket/socketEvent";
+import { Feather } from "@expo/vector-icons";
+import { FC, useEffect } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
   FlatList,
   Image,
+  Text,
+  TouchableOpacity,
+  View,
   ViewStyle,
 } from "react-native";
-import ScreenWrapper from "@/src/components/ScreenWrapper";
-import SearchBar from "./components/SearchBar";
-import KeyBoardDismissView from "@/src/components/KeyBoardDismisView";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FC } from "react";
-import { Feather } from "@expo/vector-icons";
-import { mockFriends, mockMessages } from "../mockData";
+import { mockFriends } from "../mockData";
 import { ListMessage } from "./components/MessageItem";
+import SearchBar from "./components/SearchBar";
 
 const HomeScreen = () => {
+
   return (
     <SafeAreaView style={{ paddingHorizontal: 16, gap: 16, flex: 1 }}>
       <HeaderHome />

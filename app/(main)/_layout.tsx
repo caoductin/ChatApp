@@ -165,7 +165,6 @@ const createStyle = (theme: ThemeType) =>
       elevation: 6,
     },
     textFocus: {
-      // color: "#0021f5ff",
       color: theme.inverseSurface,
       fontWeight: "600",
     },

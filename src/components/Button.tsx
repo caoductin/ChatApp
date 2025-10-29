@@ -2,10 +2,7 @@ import { colors, radius } from "@/constants/theme";
 import { ButtonProps } from "@/types";
 import { verticalScale } from "@/utils/styling";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import Animated, {
-  CSSAnimationKeyframes,
-  LinearTransition,
-} from "react-native-reanimated";
+import Animated, { CSSAnimationKeyframes } from "react-native-reanimated";
 import Loading from "./Loading";
 
 const AnimatedTouchableOpacity =
@@ -47,12 +44,6 @@ const Button = ({ style, onPress, loading, children }: ButtonProps) => {
       onPress={onPress}
     >
       {children}
-      {/* <Animated.Text style={{ textAlign: "justify" }} layout={LinearTransition}>
-        Sign
-      </Animated.Text>
-      <Animated.Text style={{ textAlign: "justify" }} layout={LinearTransition}>
-        Up
-      </Animated.Text> */}
     </AnimatedTouchableOpacity>
   );
 };

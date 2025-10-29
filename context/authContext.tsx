@@ -4,8 +4,11 @@ import { createContext, ReactNode, use, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { login, register } from "@/services/authServies";
 import { storage } from "@/storage";
+import { connectSocket, disConnectSocket } from "@/socket/socket";
 
 const AuthContext = createContext<AuthContextProps>(null as never);
+
+export const Token = "Token";
 
 export const useAuth = () => {
   const context = use(AuthContext);
@@ -19,19 +22,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLogin, setIsLogin] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<UserProps | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
-    const token = storage.getString("token");
-    if (token) {
-      setIsLogin(true);
-    }
+    const getToken = async () => {
+      const token = await storage.getItem(Token);
+      if (token) {
+        await connectSocket();
+        setIsLogin(true);
+      }
+    };
+    getToken();
   }, []);
 
   const updateToken = async (token: string) => {
     if (token) {
       setToken(token);
-      storage.set("token", token);
+      await storage.setItem(Token, token);
       const decode = jwtDecode<DecodedTokenProps>(token);
       console.log("decode", decode);
       setUser(decode.user);
@@ -41,8 +47,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     const response = await login(email, password);
     console.log(response);
-    setIsLogin(true);
     await updateToken(response.token);
+    await connectSocket();
+    setIsLogin(true);
   };
 
   const signUp = async (
@@ -53,15 +60,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     const response = await register(email, password, name, avatar);
     await updateToken(response.token);
-    router.replace("/(main)/home");
+    await connectSocket();
   };
 
   const signOut = async () => {
     setUser(null);
     setToken(null);
     setIsLogin(false);
-    storage.clearAll();
-    router.replace("/(auth)/login");
+    await storage.removeItem(Token);
+    await disConnectSocket();
   };
 
   return (

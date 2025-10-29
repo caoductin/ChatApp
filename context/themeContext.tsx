@@ -9,9 +9,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const scheme = theme.schemes[colorScheme || "light"];
   return (
     <ThemeContext.Provider value={scheme}>
-      <View style={{ flex: 1, backgroundColor: scheme.background }}>
-        {children}
-      </View>
+      <View style={{ flex: 1, backgroundColor: "blue" }}>{children}</View>
     </ThemeContext.Provider>
   );
 };

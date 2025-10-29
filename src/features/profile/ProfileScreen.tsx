@@ -1,14 +1,8 @@
+import { useAuth } from "@/context/authContext";
 import { useAppTheme } from "@/context/themeContext";
-import { Feather } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { FC } from "react";
-import {
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from "react-native";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   appearanceSettings,
@@ -16,7 +10,6 @@ import {
   settingsConfig,
   systemSetting,
 } from "./components/settingSection";
-import { useAuth } from "@/context/authContext";
 
 export const ProfileScreen: FC = () => {
   const { signOut } = useAuth();
@@ -71,6 +64,7 @@ export const ProfileScreen: FC = () => {
 
 const HeaderProfile: FC = () => {
   const theme = useAppTheme();
+  const router = useRouter();
   return (
     <View style={{ alignItems: "center", gap: 6 }}>
       <Image
@@ -86,7 +80,11 @@ const HeaderProfile: FC = () => {
         style={{ color: theme.inverseSurface, fontWeight: "500" }}
         children={"caoductintin@gmail.com"}
       />
-      <TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => {
+          router.navigate("/profile/edit-info");
+        }}
+      >
         <View
           style={{
             padding: 8,
@@ -119,5 +117,3 @@ const FooterProfile: FC<{ onpress: () => void }> = ({ onpress }) => {
     </TouchableOpacity>
   );
 };
-
-const createStyles
