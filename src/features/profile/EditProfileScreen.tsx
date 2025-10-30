@@ -1,12 +1,17 @@
 import { useAuth } from "@/context/authContext";
 import { ThemeType, useAppTheme } from "@/context/themeContext";
-import { UserDataProps } from "@/types";
+import { updateProfile } from "@/socket/socketEvent";
+import { useRouter } from "expo-router";
 import { FC, useEffect, useReducer, useState } from "react";
+// import * as ImagePicker from "expoz-image-picker";
 import {
+  Alert,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  TextInputProps,
   TextStyle,
   TouchableOpacity,
   View,
@@ -23,8 +28,12 @@ const formReducer = (state: any, action: any) => {
 };
 
 export const EditProfileScreen: FC = () => {
+  const { user, updateToken } = useAuth();
+  const theme = useAppTheme();
+  const router = useRouter();
+  const mockUri = "https://randomuser.me/api/portraits/women/2.jpg";
   const [formState, dispatch] = useReducer(formReducer, {
-    username: "",
+    name: "",
     email: "",
     oldPassword: "",
     newPassword: "",
@@ -34,55 +43,81 @@ export const EditProfileScreen: FC = () => {
     dispatch({ field, value });
   };
 
-  const { user } = useAuth();
-  const [userData, setUserData] = useState<UserDataProps>({
-    name: "",
-    email: "",
-    avatar: null,
-  });
-
   useEffect(() => {
     if (user) {
-      setUserData(user);
-      dispatch({ field: "username", value: user.name || "" });
+      console.log("this is user", user);
+      dispatch({ field: "name", value: user.name || "" });
+      dispatch({ field: "avatar", value: user.avatar || "" });
       dispatch({ field: "email", value: user.email || "" });
-      console.log("this is form state 1 ", formState);
     }
-    console.log("this is user", user);
   }, [user]);
 
   useEffect(() => {
-    console.log("formState changed: ", formState);
-  }, [formState]);
+    updateProfile(processUpdateProfile);
+    return () => {
+      updateProfile(processUpdateProfile, true);
+    };
+  }, []);
 
-  const theme = useAppTheme();
-  const mockUri = "https://randomuser.me/api/portraits/women/2.jpg";
+  const pickImage = async () => {
+    // let result = await ImagePicker.launchImageLibraryAsync({
+    //   mediaTypes: ["images"],
+    //   allowsEditing: true,
+    //   aspect: [4, 3],
+    //   quality: 0.5,
+    // });
+    // if (!result.canceled) {
+    //   console.log(result.assets[0].uri);
+    //   dispatch({ field: "avatar", value: result.assets[0].uri });
+    // }
+  };
+
+  const processUpdateProfile = (res: any) => {
+    console.log("this is res from socket", res);
+    if (res.success) {
+      updateToken(res.data.newToken);
+      router.back();
+    } else {
+      Alert.alert("Failed", res.msg);
+    }
+  };
+
+  const hanleSubmitProfile = () => {
+    if (!formState.name.trim()) {
+      Alert.alert("Error", "Please enter the name");
+      return;
+    }
+    console.log(formState);
+    updateProfile(formState);
+  };
 
   return (
     <View style={{ flex: 1, paddingHorizontal: 16 }}>
-      <Animated.View style={{ alignItems: "center" }}>
-        <Avatar uri={mockUri} />
-      </Animated.View>
-      <View style={{ flex: 1, gap: 16 }}>
-        <View style={{ gap: 4 }}>
-          <Text style={{ fontWeight: "600" }}>Account Infomation</Text>
-          <AcountInfoView
-            name={formState.name}
-            email={formState.email}
-            onChange={handleChange}
-          />
-        </View>
+      <ScrollView>
+        <Animated.View style={{ alignItems: "center" }}>
+          <Avatar uri={formState.avatar} onPress={pickImage} />
+        </Animated.View>
+        <View style={{ flex: 1, gap: 16 }}>
+          <View style={{ gap: 4 }}>
+            <Text style={{ fontWeight: "600" }}>Account Infomation</Text>
+            <AcountInfoView
+              name={formState.name}
+              email={formState.email}
+              onChange={handleChange}
+            />
+          </View>
 
-        <View style={{ gap: 4 }}>
-          <Text style={{ fontWeight: "600" }}>Password Infomation</Text>
-          <PasswordView
-            password={formState.password}
-            confirmPassword={formState.confirmPassword}
-            onChange={handleChange}
-          />
+          <View style={{ gap: 4 }}>
+            <Text style={{ fontWeight: "600" }}>Password Infomation</Text>
+            <PasswordView
+              oldPassword={formState.oldPassword}
+              newPassword={formState.newPassword}
+              onChange={handleChange}
+            />
+          </View>
+          <FooterProfile onpress={hanleSubmitProfile} theme={theme} />
         </View>
-        <FooterProfile onpress={() => {}} theme={theme} />
-      </View>
+      </ScrollView>
     </View>
   );
 };
@@ -91,9 +126,9 @@ const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
 interface AvatarProps {
   uri: string;
-  onpress?: () => void;
+  onPress?: () => void;
 }
-const Avatar: FC<AvatarProps> = ({ uri, onpress }) => {
+const Avatar: FC<AvatarProps> = ({ uri, onPress }) => {
   const theme = useAppTheme();
   const scale = useSharedValue(1);
 
@@ -113,7 +148,7 @@ const Avatar: FC<AvatarProps> = ({ uri, onpress }) => {
 
   return (
     <AnimatedTouchable
-      onPress={onpress}
+      onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       style={animatedStyle}
@@ -141,6 +176,7 @@ interface LabelInputProps {
   onChange?: (text: string) => void;
   viewStyle?: ViewStyle;
   inputStyle?: TextStyle;
+  editable?: boolean;
 }
 
 const LabelInput: FC<LabelInputProps> = ({
@@ -149,6 +185,7 @@ const LabelInput: FC<LabelInputProps> = ({
   onChange,
   viewStyle,
   inputStyle,
+  editable = true,
 }) => {
   return (
     <View style={[{ gap: 8 }, viewStyle]}>
@@ -157,6 +194,7 @@ const LabelInput: FC<LabelInputProps> = ({
         style={[styles.textInput, inputStyle]}
         value={value}
         onChangeText={onChange}
+        editable={editable}
       />
     </View>
   );
@@ -189,20 +227,21 @@ const AcountInfoView: FC<AccountInfoProps> = ({ name, email, onChange }) => {
         label={"Email"}
         value={email}
         onChange={(text: string) => onChange("email", text)}
+        editable={false}
       />
     </View>
   );
 };
 
 interface PasswordProps {
-  password: string;
-  confirmPassword: string;
+  oldPassword: string;
+  newPassword: string;
   onChange: (field: string, value: string) => void;
 }
 
 const PasswordView: FC<PasswordProps> = ({
-  password,
-  confirmPassword,
+  oldPassword,
+  newPassword,
   onChange,
 }) => {
   const theme = useAppTheme();
@@ -218,12 +257,12 @@ const PasswordView: FC<PasswordProps> = ({
     >
       <LabelInput
         label={"Old Password"}
-        value={password}
-        onChange={(text) => onChange("password", text)}
+        value={oldPassword}
+        onChange={(text) => onChange("oldPassword", text)}
       />
       <LabelInput
         label={"New passwrod"}
-        value={confirmPassword}
+        value={newPassword}
         onChange={(text) => onChange("newPassword", text)}
       />
     </View>

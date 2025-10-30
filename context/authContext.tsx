@@ -26,7 +26,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const getToken = async () => {
       const token = await storage.getItem(Token);
+      
       if (token) {
+        const decode = jwtDecode<DecodedTokenProps>(token)
+        setUser(decode.user)
         await connectSocket();
         setIsLogin(true);
       }
