@@ -1,8 +1,15 @@
 import { useAuth } from "@/context/authContext";
-import { useAppTheme } from "@/context/themeContext";
+import { ThemeType, useAppTheme } from "@/context/themeContext";
 import { useRouter } from "expo-router";
 import React, { FC } from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   appearanceSettings,
@@ -14,6 +21,21 @@ import {
 export const ProfileScreen: FC = () => {
   const { signOut } = useAuth();
   const theme = useAppTheme();
+
+  const handleSignOut = () => {
+    Alert.alert("Infomation", "Are you sure to want logout", [
+      {
+        text: "Cancel",
+        onPress: () => console.log("cancel logout"),
+        style: "cancel",
+      },
+      {
+        text: "Logout",
+        onPress: signOut,
+        style: "destructive",
+      },
+    ]);
+  };
 
   return (
     <SafeAreaView
@@ -56,7 +78,7 @@ export const ProfileScreen: FC = () => {
             termServicesPress: () => console.log("tempServicesPress"),
           }}
         />
-        <FooterProfile onpress={signOut} />
+        <FooterProfile onPress={handleSignOut} theme={theme} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -101,11 +123,15 @@ const HeaderProfile: FC = () => {
   );
 };
 
-const FooterProfile: FC<{ onpress: () => void }> = ({ onpress }) => {
-  const theme = useAppTheme();
+interface FooterProfileProps {
+  onPress: () => void;
+  theme: ThemeType;
+}
+
+const FooterProfile: FC<FooterProfileProps> = ({ onPress, theme }) => {
   return (
     <TouchableOpacity
-      onPress={onpress}
+      onPress={onPress}
       style={{
         backgroundColor: theme.tertiaryFixedDim,
         alignItems: "center",
