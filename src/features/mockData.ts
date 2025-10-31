@@ -1,4 +1,9 @@
-export const mockFriends = [
+export interface FriendProps {
+  id: string;
+  name: string;
+  avatar: string;
+}
+export const mockFriends: FriendProps[] = [
   {
     id: "1",
     name: "Alice Johnson",

@@ -7,7 +7,8 @@ import { View } from "react-native";
 import "../src/localize/i18next";
 
 const StackLayout = () => {
-  const { isLogin } = useAuth();
+  // const { isLogin } = useAuth();
+  const isLogin = true;
   const theme = useAppTheme();
 
   return (

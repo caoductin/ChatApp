@@ -59,6 +59,10 @@ export const EditProfileScreen: FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    console.log("form data", formState);
+  }, [formState]);
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
@@ -98,7 +102,7 @@ export const EditProfileScreen: FC = () => {
       console.log("this is data upload to cloudinary", res);
       data.avatar = res.data;
     }
-    updateProfile(formState);
+    updateProfile(data);
   };
 
   return (
@@ -138,6 +142,7 @@ interface AvatarProps {
   uri: string;
   onPress?: () => void;
 }
+
 const Avatar: FC<AvatarProps> = ({ uri, onPress }) => {
   const theme = useAppTheme();
   const scale = useSharedValue(1);

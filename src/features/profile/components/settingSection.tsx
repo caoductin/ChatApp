@@ -36,13 +36,6 @@ export const systemSetting: SettingConfigProps[] = [
   { label: "Terms of Service", icon: "book", onPressKey: "termServicesPress" },
 ];
 
-// interface SectionSettingHandlers {
-//   settingPress?: () => void;
-//   emailPress?: () => void;
-//   languagePress?: () => void;
-//   privacyPress?: () => void;
-// }
-
 const allSettings = [
   ...appearanceSettings,
   ...systemSetting,

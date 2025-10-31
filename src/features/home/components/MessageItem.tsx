@@ -27,7 +27,7 @@ const MessageItem: FC<MessagesItemProps> = ({
     >
       <Image
         source={{ uri: avatar }}
-        style={{ width: 40, height: 40, borderRadius: "100%" }}
+        style={{ width: 40, height: 40, borderRadius: 100 }}
       />
       <View style={{ flex: 1, gap: 4 }}>
         <View
@@ -79,7 +79,7 @@ export const ListMessage: FC = () => {
 const styles = StyleSheet.create({
   unreadNumber: {
     padding: 4,
-    borderRadius: "100%",
+    borderRadius: 100,
     backgroundColor: "#0d0df8ff",
   },
   name: {

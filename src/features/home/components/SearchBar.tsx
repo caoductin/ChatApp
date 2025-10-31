@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import React, { useRef, useState } from "react";
+import React, { FC, useRef, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity } from "react-native";
 import Animated, {
   FadeInRight,
@@ -12,17 +12,40 @@ import Animated, {
 const AnimatedTouableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
 
-const SearchBar = () => {
+interface SearchBarProps {
+  label?: string;
+  cancelLabel?: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  onClear?: () => void;
+  onBlur?: () => void;
+  onCancel?: () => void;
+  onFocus?: () => void;
+  isHiddenIcon?: boolean;
+}
+
+const SearchBar: FC<SearchBarProps> = ({
+  label = "Search...",
+  cancelLabel = "Cancel",
+  value,
+  onChangeText,
+  onClear,
+  onBlur,
+  onCancel,
+  onFocus,
+  isHiddenIcon = false,
+}) => {
   const [isFocused, setIsFocused] = useState(false);
-  const [textSearch, setTextSearch] = useState("");
   const inputRef = useRef<TextInput>(null);
 
   const handleClear = () => {
-    setTextSearch("");
+    onClear?.();
+    onChangeText("");
   };
 
   const handleDismiss = () => {
     inputRef.current?.blur();
+    onCancel?.();
   };
 
   return (
@@ -42,25 +65,29 @@ const SearchBar = () => {
         }}
         layout={LinearTransition}
       >
-        <Feather
-          name="search"
-          size={20}
-          color={isFocused ? "gray" : "#d6d6d6ff"}
-        />
+        {!isHiddenIcon && (
+          <Feather
+            name="search"
+            size={20}
+            color={isFocused ? "gray" : "#d6d6d6ff"}
+          />
+        )}
         <TextInput
           ref={inputRef}
-          placeholder="Seach..."
-          value={textSearch}
-          onChangeText={setTextSearch}
+          placeholder={label}
+          value={value}
+          onChangeText={onChangeText}
           style={{ flex: 1 }}
           onFocus={() => {
             setIsFocused(true);
+            onFocus?.();
           }}
           onBlur={() => {
             setIsFocused(false);
+            onBlur?.();
           }}
         />
-        {!!textSearch && (
+        {!!value && (
           <AnimatedTouableOpacity
             onPress={handleClear}
             entering={ZoomIn.duration(100)}
@@ -81,7 +108,7 @@ const SearchBar = () => {
           entering={FadeInRight.duration(100)}
           exiting={FadeOutRight.duration(100)}
         >
-          <Text style={{ fontWeight: "600" }} children={"Cancel"} />
+          <Text style={{ fontWeight: "600" }} children={cancelLabel} />
         </AnimatedTouableOpacity>
       )}
     </Animated.View>
