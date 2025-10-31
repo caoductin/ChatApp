@@ -1,9 +1,10 @@
 import { useAuth } from "@/context/authContext";
 import { ThemeType, useAppTheme } from "@/context/themeContext";
+import { uploadFileToCloudinary } from "@/services/imageService";
 import { updateProfile } from "@/socket/socketEvent";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import { FC, useEffect, useReducer, useState } from "react";
-// import * as ImagePicker from "expoz-image-picker";
+import { FC, useEffect, useReducer } from "react";
 import {
   Alert,
   Image,
@@ -11,7 +12,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TextInputProps,
   TextStyle,
   TouchableOpacity,
   View,
@@ -60,16 +60,16 @@ export const EditProfileScreen: FC = () => {
   }, []);
 
   const pickImage = async () => {
-    // let result = await ImagePicker.launchImageLibraryAsync({
-    //   mediaTypes: ["images"],
-    //   allowsEditing: true,
-    //   aspect: [4, 3],
-    //   quality: 0.5,
-    // });
-    // if (!result.canceled) {
-    //   console.log(result.assets[0].uri);
-    //   dispatch({ field: "avatar", value: result.assets[0].uri });
-    // }
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.5,
+    });
+    if (!result.canceled) {
+      console.log(result.assets[0].uri);
+      dispatch({ field: "avatar", value: result.assets[0].uri });
+    }
   };
 
   const processUpdateProfile = (res: any) => {
@@ -82,12 +82,22 @@ export const EditProfileScreen: FC = () => {
     }
   };
 
-  const hanleSubmitProfile = () => {
-    if (!formState.name.trim()) {
+  const hanleSubmitProfile = async () => {
+    if (!formState.name.trim() || !formState) {
       Alert.alert("Error", "Please enter the name");
       return;
     }
-    console.log(formState);
+    const data = {
+      name: formState.name,
+      avatar: formState.avatar,
+    };
+    console.log("this is log", data);
+
+    if (formState.avatar) {
+      const res = await uploadFileToCloudinary(formState.avatar, "profiles");
+      console.log("this is data upload to cloudinary", res);
+      data.avatar = res.data;
+    }
     updateProfile(formState);
   };
 
