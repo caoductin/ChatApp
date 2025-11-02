@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { FlatList, Image, Text, View, StyleSheet } from "react-native";
+import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import { mockMessages } from "../../mockData";
 
 interface MessagesItemProps {

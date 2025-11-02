@@ -16,7 +16,7 @@ import {
   SectionSetting,
   settingsConfig,
   systemSetting,
-} from "./components/SettingSection";
+} from "./components/settingSection";
 
 export const ProfileScreen: FC = () => {
   const { signOut } = useAuth();
@@ -59,7 +59,6 @@ export const ProfileScreen: FC = () => {
             privacyPress: () => console.log("Privacy"),
           }}
         />
-
         <SectionSetting
           label="Appearance and exprience"
           itemSetting={appearanceSettings}

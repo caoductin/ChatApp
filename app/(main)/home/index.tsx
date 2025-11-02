@@ -1,7 +1,6 @@
 import { testSocket } from "@/socket/socketEvent";
-import HomeScreen from "@/src/features/home/HomeScreen";
+import HomeScreen from "@/src/features/home/screens/HomeScreen";
 import { useEffect } from "react";
-import { View, Text } from "react-native";
 
 const Home = () => {
   const callbackHanlder = (data: any) => {

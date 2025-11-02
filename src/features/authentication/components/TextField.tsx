@@ -1,15 +1,15 @@
 import { colors, radius } from "@/constants/theme";
+import { ThemeType } from "@/context/themeContext";
+import { IconProps } from "@/src/components";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { ComponentProps, FC } from "react";
+import { FC } from "react";
 import {
+  StyleSheet,
+  Text,
   TextInput,
   TextInputProps,
   View,
-  StyleSheet,
-  Text,
 } from "react-native";
-
-type IconProps = ComponentProps<typeof Ionicons>;
 
 export const TextField: FC<TextInputProps & { icon: IconProps["name"] }> = ({
   icon,
@@ -27,14 +27,21 @@ export const TextField: FC<TextInputProps & { icon: IconProps["name"] }> = ({
 interface FormProps extends TextInputProps {
   icon: IconProps["name"];
   label: string;
+  theme: ThemeType;
   error: string | undefined;
 }
 
-export const FormField: FC<FormProps> = ({ icon, label, error, ...props }) => {
+export const FormField: FC<FormProps> = ({
+  icon,
+  theme,
+  label,
+  error,
+  ...props
+}) => {
   return (
     <View>
       <TextField icon={icon} placeholder={label} {...props} />
-      {error && <Text style={{ color: "red" }} children={error} />}
+      {error && <Text style={{ color: theme.error }} children={error} />}
     </View>
   );
 };

@@ -1,6 +1,8 @@
+import { useAppTheme } from "@/context/themeContext";
+import { AnimatedTouableOpacity } from "@/src/components";
 import { Feather } from "@expo/vector-icons";
 import React, { FC, useRef, useState } from "react";
-import { StyleSheet, Text, TextInput, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, TextInput, TextStyle } from "react-native";
 import Animated, {
   FadeInRight,
   FadeOutRight,
@@ -8,9 +10,6 @@ import Animated, {
   ZoomIn,
   ZoomOut,
 } from "react-native-reanimated";
-
-const AnimatedTouableOpacity =
-  Animated.createAnimatedComponent(TouchableOpacity);
 
 interface SearchBarProps {
   label?: string;
@@ -22,6 +21,7 @@ interface SearchBarProps {
   onCancel?: () => void;
   onFocus?: () => void;
   isHiddenIcon?: boolean;
+  textInputStyle?: TextStyle;
 }
 
 const SearchBar: FC<SearchBarProps> = ({
@@ -34,9 +34,11 @@ const SearchBar: FC<SearchBarProps> = ({
   onCancel,
   onFocus,
   isHiddenIcon = false,
+  textInputStyle,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<TextInput>(null);
+  const theme = useAppTheme();
 
   const handleClear = () => {
     onClear?.();
@@ -55,12 +57,14 @@ const SearchBar: FC<SearchBarProps> = ({
       <Animated.View
         style={{
           flex: 1,
+          alignItems: "center",
           flexDirection: "row",
-          padding: isFocused ? 10.5 : 12,
-          backgroundColor: "#ffffffff",
+          paddingHorizontal: 12,
+          backgroundColor: theme.onPrimary,
           borderRadius: 100,
           borderWidth: isFocused ? 1.5 : 0,
           borderColor: "#b5b5b5ff",
+          paddingVertical: isFocused ? 6.5 : 8,
           gap: 8,
         }}
         layout={LinearTransition}
@@ -77,7 +81,7 @@ const SearchBar: FC<SearchBarProps> = ({
           placeholder={label}
           value={value}
           onChangeText={onChangeText}
-          style={{ flex: 1 }}
+          style={[{ flex: 1 }, textInputStyle]}
           onFocus={() => {
             setIsFocused(true);
             onFocus?.();
