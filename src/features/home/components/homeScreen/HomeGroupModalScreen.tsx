@@ -1,11 +1,12 @@
 import { ThemeType, useAppTheme } from "@/context/themeContext";
+import { getContacts } from "@/socket/socketEvent";
+import { AnimatedTouchableOpacity } from "@/src/components";
 import { Avatar } from "@/src/components/Avatar";
 import { Feather } from "@expo/vector-icons";
-import { useNavigation, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  FlatList,
   Image,
   StyleSheet,
   Text,
@@ -16,38 +17,35 @@ import {
 import Animated, {
   LinearTransition,
   SlideInRight,
-  useAnimatedStyle,
   useSharedValue,
   withSpring,
   ZoomIn,
   ZoomOut,
 } from "react-native-reanimated";
 import { useImmer } from "use-immer";
-import { FriendProps, mockFriends } from "../../../mockData";
+import { FriendProps } from "../../../mockData";
 import SearchBar from "../SearchBar";
-import { Header } from "@react-navigation/elements";
-import { getContacts } from "@/socket/socketEvent";
+import { ListChooseFriend } from "./ListChooseFriend";
 
-interface Todo {
-  id: string;
-  title: string;
-  done: boolean;
-}
-
-interface User {
+export interface Contact {
   id: string;
   name: string;
+  email: string;
   avatar: string;
 }
 
+export interface GetContactsResponse {
+  success: boolean;
+  data: Contact[];
+}
 const HomeGroupMdScreen = () => {
   const theme = useAppTheme();
   const router = useRouter();
   const styles = useMemo(() => getStyles(theme), [theme]);
-  const [selectedUser, setSelectedUsers] = useImmer<FriendProps[]>([]);
+  const [selectedUser, setSelectedUsers] = useImmer<Contact[]>([]);
   const [text, onChangeText] = useState("");
   const [nameGroup, setNameGroup] = useState("");
-  const [contact, setContacts] = useState([]);
+  const [contact, setContacts] = useState<Contact[]>([]);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -58,7 +56,7 @@ const HomeGroupMdScreen = () => {
     router.back();
   };
 
-  const handleUserToggle = useCallback((user: FriendProps) => {
+  const handleUserToggle = useCallback((user: Contact) => {
     setSelectedUsers((draft) => {
       const index = draft.findIndex((t) => t.id === user.id);
       if (index > -1) {
@@ -77,12 +75,17 @@ const HomeGroupMdScreen = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (contact && contact.length > 0) {
+      console.log("State 'contact' đã được cập nhật:", contact);
+    }
+  }, [contact]);
+
   const createGroup = () => {};
 
-  const processGetContacts = (res: any) => {
+  const processGetContacts = (res: GetContactsResponse) => {
     if (res.success) {
       setContacts(res.data);
-      console.log("this is getContact", contact);
     }
   };
   return (
@@ -95,18 +98,10 @@ const HomeGroupMdScreen = () => {
         isShowButton={!(selectedUser.length === 0)}
       />
       <Avatar
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          borderColor: theme.surfaceContainerLow,
-        }}
-        imageProps={{
-          source: {
-            uri: mockFriends[0].avatar,
-          },
-          resizeMode: "cover",
-          style: { width: 96, height: 96, borderRadius: 100 },
-        }}
+        viewStyle={{ alignItems: "center" }}
+        source={{ uri: "" }}
+        style={{ width: 96, height: 96, borderRadius: 100 }}
+        resizeMode="cover"
       />
       <Animated.View layout={LinearTransition.duration(500)}>
         {selectedUser.length > 0 && (
@@ -116,14 +111,36 @@ const HomeGroupMdScreen = () => {
             horizontal={true}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            itemLayoutAnimation={LinearTransition}
+            itemLayoutAnimation={LinearTransition.duration(200)}
             renderItem={({ item }) => {
               return (
-                <AvatarItem
-                  theme={theme}
-                  item={item}
-                  onPress={() => handleUserToggle(item)}
-                />
+                <Animated.View entering={ZoomIn} exiting={ZoomOut}>
+                  <Avatar
+                    onPress={() => handleUserToggle(item)}
+                    viewStyle={{ alignItems: "center", borderWidth: 0 }}
+                    source={{ uri: item.avatar }}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 100,
+                      borderWidth: 0,
+                    }}
+                    resizeMode="cover"
+                  />
+                  <Feather
+                    style={{
+                      position: "absolute",
+                      right: -5,
+                      top: -5,
+                      borderRadius: 100,
+                      padding: 2,
+                      backgroundColor: theme.surfaceContainer,
+                    }}
+                    name="x"
+                    color={theme.onSurface}
+                    size={14}
+                  />
+                </Animated.View>
               );
             }}
           />
@@ -145,7 +162,8 @@ const HomeGroupMdScreen = () => {
       <ListChooseFriend
         theme={theme}
         onPress={handleUserToggle}
-        user={selectedUser}
+        contacts={contact}
+        selectedContact={selectedUser}
       />
     </View>
   );
@@ -166,9 +184,15 @@ const AvatarItem: FC<renderItemProps> = ({ item, style, theme, ...rest }) => {
   }, []);
 
   return (
-    <AnimatedButton style={style} entering={ZoomIn} exiting={ZoomOut} {...rest}>
+    <AnimatedTouchableOpacity
+      style={style}
+      entering={ZoomIn}
+      exiting={ZoomOut}
+      {...rest}
+    >
       <AnimatedImage
         source={{ uri: item.avatar }}
+        defaultSource={require("@/assets/images/favicon.png")}
         style={{ width: 48, height: 48, borderRadius: 100 }}
       />
 
@@ -185,7 +209,7 @@ const AvatarItem: FC<renderItemProps> = ({ item, style, theme, ...rest }) => {
         color={theme.onSurface}
         size={14}
       />
-    </AnimatedButton>
+    </AnimatedTouchableOpacity>
   );
 };
 
@@ -216,11 +240,13 @@ export const HeaderGroupScreen: FC<HeaderGroupProps> = ({
       <TouchableOpacity onPress={backPress}>
         <Text style={styles.backButton} children={"Back"} />
       </TouchableOpacity>
-      <Animated.Text style={styles.titleText} layout={LinearTransition}>
-        New Group
-      </Animated.Text>
+      <Animated.Text
+        style={styles.titleText}
+        layout={LinearTransition}
+        children={"New Group"}
+      />
       {isShowButton && (
-        <AnimatedButton onPress={createPress} entering={SlideInRight}>
+        <AnimatedTouchableOpacity onPress={createPress} entering={SlideInRight}>
           <Text
             style={[
               styles.textCreate,
@@ -228,7 +254,7 @@ export const HeaderGroupScreen: FC<HeaderGroupProps> = ({
             ]}
             children={"Create"}
           />
-        </AnimatedButton>
+        </AnimatedTouchableOpacity>
       )}
     </View>
   );
@@ -255,110 +281,6 @@ const getStyles = (theme: ThemeType) => {
       ...baseButtonStyle,
     },
   });
-};
-
-interface ListChooseFriendProps {
-  theme: ThemeType;
-  onPress: (user: FriendProps) => void;
-  user: FriendProps[];
-}
-
-const ListChooseFriend: FC<ListChooseFriendProps> = ({
-  theme,
-  onPress,
-  user,
-}) => {
-  return (
-    <FlatList
-      contentContainerStyle={{ rowGap: 6, paddingBottom: 32 }}
-      data={mockFriends}
-      keyExtractor={(item) => item.id}
-      showsVerticalScrollIndicator={false}
-      renderItem={({ item }) => {
-        return (
-          <ListItemFriend
-            theme={theme}
-            name={item.name}
-            avatar={item.avatar}
-            onPress={() => onPress(item)}
-            isSelected={user.includes(item)}
-          />
-        );
-      }}
-    />
-  );
-};
-
-interface ListItemFriendProps {
-  theme: ThemeType;
-  name: string;
-  avatar: string;
-  isSelected?: boolean;
-  onPress?: () => void;
-}
-
-const AnimatedButton = Animated.createAnimatedComponent(TouchableOpacity);
-
-const ListItemFriend: FC<ListItemFriendProps> = ({
-  theme,
-  name,
-  avatar,
-  isSelected = false,
-  onPress,
-}) => {
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-    };
-  });
-  const handlePressIn = () => {
-    scale.value = withSpring(0.9);
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1);
-  };
-
-  return (
-    <AnimatedButton
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      onPress={onPress}
-      style={[
-        {
-          flex: 1,
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 4,
-          borderRadius: 10,
-        },
-        animatedStyle,
-        isSelected && { backgroundColor: theme.inverseOnSurface },
-      ]}
-    >
-      <Avatar
-        style={{
-          borderWidth: 0,
-          borderColor: theme.surfaceContainerLow,
-        }}
-        imageProps={{
-          source: {
-            uri: avatar,
-          },
-          resizeMode: "cover",
-          style: { width: 38, height: 38, borderRadius: 100 },
-        }}
-      />
-      <Text style={{ flex: 1 }} children={name} />
-      {!isSelected ? (
-        <Feather name="circle" size={20} color={theme.inversePrimary} />
-      ) : (
-        <Feather name="check-circle" size={20} color={theme.primary} />
-      )}
-    </AnimatedButton>
-  );
 };
 
 export default HomeGroupMdScreen;

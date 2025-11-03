@@ -16,7 +16,7 @@ import {
   SectionSetting,
   settingsConfig,
   systemSetting,
-} from "./components/SettingSection";
+} from "./components/settingSection";
 
 export const ProfileScreen: FC = () => {
   const { signOut } = useAuth();

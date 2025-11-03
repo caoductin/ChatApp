@@ -7,5 +7,5 @@ export type FeatherType = ComponentProps<typeof Feather>;
 export type IconProps = ComponentProps<typeof Ionicons>;
 
 // animation
-export const AnimatedTouableOpacity =
+export const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);

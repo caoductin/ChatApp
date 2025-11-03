@@ -1,20 +1,10 @@
-import { useAuth } from "@/context/authContext";
-import { ThemeType, useAppTheme } from "@/context/themeContext";
-import { uploadFileToCloudinary } from "@/services/imageService";
-import { updateProfile } from "@/socket/socketEvent";
-import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import { FC, useEffect, useReducer } from "react";
+// import defaultAvatar from "@/assets/defaultAvatar.png";
+import { useAppTheme } from "@/context/themeContext";
+import { FC, useState } from "react";
 import {
-  Alert,
   Image,
   ImageProps,
-  ImageStyle,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TextStyle,
+  ImageSourcePropType,
   TouchableOpacity,
   View,
   ViewStyle,
@@ -24,40 +14,62 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-
-interface AvatarProps {
-  style: ViewStyle;
-  imageProps: ImageProps;
+interface AvatarProps extends ImageProps {
+  viewStyle?: ViewStyle;
   onPress?: () => void;
 }
+
+// export const AvatarWithFallback = ({ uri }: { uri?: string }) => {
+//   const [error, setError] = useState(false);
+
+//   return (
+//     <Image
+//       source={error || !uri || uri.trim() === "" ? defaultAvatar : { uri }}
+//       onError={() => setError(true)}
+//       style={{ width: 48, height: 48, borderRadius: 100 }}
+//       resizeMode="cover"
+//     />
+//   );
+// };
 
 export const AnimatedTouchable =
   Animated.createAnimatedComponent(TouchableOpacity);
 
-export const Avatar: FC<AvatarProps> = ({ onPress, style, imageProps }) => {
+interface AvatarProps extends Omit<ImageProps, "source"> {
+  source?: ImageSourcePropType;
+  viewStyle?: ViewStyle;
+  onPress?: () => void;
+}
+
+export const Avatar: FC<AvatarProps> = ({
+  source,
+  viewStyle,
+  onPress,
+  style,
+  ...rest
+}) => {
   const theme = useAppTheme();
   const scale = useSharedValue(1);
+  const [error, setError] = useState(false);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-    };
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
-  const handlePressIn = () => {
-    scale.value = withSpring(0.8);
-  };
+  const handlePressIn = () => (scale.value = withSpring(0.9));
+  const handlePressOut = () => (scale.value = withSpring(1));
 
-  const handlePressOut = () => {
-    scale.value = withSpring(1);
-  };
+  const finalSource =
+    error || !source || (source as any)?.uri?.trim() === ""
+      ? require("@/assets/images/defaultAvatar.png")
+      : source;
 
   return (
     <AnimatedTouchable
-      onPress={onPress}
+      style={[viewStyle, animatedStyle]}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[style, animatedStyle]}
+      onPress={onPress}
     >
       <View
         style={[
@@ -65,11 +77,18 @@ export const Avatar: FC<AvatarProps> = ({ onPress, style, imageProps }) => {
             borderColor: theme.onPrimary,
             borderWidth: 8,
             borderRadius: 100,
+            overflow: "hidden",
           },
-          style,
+          viewStyle,
         ]}
       >
-        <Image {...imageProps} />
+        <Image
+          source={finalSource}
+          onError={() => setError(true)}
+          style={[{ width: 48, height: 48, borderRadius: 100 }, style]}
+          resizeMode="cover"
+          {...rest}
+        />
       </View>
     </AnimatedTouchable>
   );

@@ -1,10 +1,9 @@
 import { useAppTheme } from "@/context/themeContext";
-import { AnimatedTouableOpacity } from "@/src/components";
+import { AnimatedTouchableOpacity } from "@/src/components";
 import { Feather } from "@expo/vector-icons";
 import React, { FC, useRef, useState } from "react";
 import { StyleSheet, Text, TextInput, TextStyle } from "react-native";
 import Animated, {
-  Easing,
   FadeInRight,
   FadeOutRight,
   ZoomIn,
@@ -94,7 +93,7 @@ const SearchBar: FC<SearchBarProps> = ({
           }}
         />
         {!!value && (
-          <AnimatedTouableOpacity
+          <AnimatedTouchableOpacity
             onPress={handleClear}
             entering={ZoomIn.duration(100)}
             exiting={ZoomOut.duration(100)}
@@ -104,18 +103,18 @@ const SearchBar: FC<SearchBarProps> = ({
               size={20}
               color={isFocused ? "gray" : "#d6d6d6ff"}
             />
-          </AnimatedTouableOpacity>
+          </AnimatedTouchableOpacity>
         )}
       </Animated.View>
       {isFocused && (
-        <AnimatedTouableOpacity
+        <AnimatedTouchableOpacity
           onPress={handleDismiss}
           style={{ padding: 8, borderRadius: 50 }}
           entering={FadeInRight.duration(100)}
           exiting={FadeOutRight.duration(100)}
         >
           <Text style={{ fontWeight: "600" }} children={cancelLabel} />
-        </AnimatedTouableOpacity>
+        </AnimatedTouchableOpacity>
       )}
     </Animated.View>
   );

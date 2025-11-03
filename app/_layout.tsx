@@ -1,14 +1,12 @@
 import { AuthProvider, useAuth } from "@/context/authContext";
 import { ThemeProvider, useAppTheme } from "@/context/themeContext";
-import { login } from "@/services/authServies";
 import { Stack } from "expo-router";
 import { FC, ReactNode } from "react";
 import { View } from "react-native";
 import "../src/localize/i18next";
 
 const StackLayout = () => {
-  // const { isLogin } = useAuth();
-  const isLogin = true;
+  const { isLogin } = useAuth();
   const theme = useAppTheme();
 
   return (
