@@ -1,7 +1,7 @@
 import { useAppTheme } from "@/context/themeContext";
 import { useTheme } from "@react-navigation/native";
 import { Stack } from "expo-router";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 
 export default function HomeLayout() {
   const theme = useAppTheme();
@@ -20,7 +20,10 @@ export default function HomeLayout() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen
         name="newGroupModal"
-        options={{ presentation: "modal", headerShown: false }}
+        options={{
+          presentation: "modal",
+          headerShown: false,
+        }}
       />
     </Stack>
   );

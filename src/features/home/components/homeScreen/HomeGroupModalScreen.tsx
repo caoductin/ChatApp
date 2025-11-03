@@ -1,7 +1,7 @@
 import { ThemeType, useAppTheme } from "@/context/themeContext";
 import { Avatar } from "@/src/components/Avatar";
 import { Feather } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableOpacityProps,
   View,
 } from "react-native";
 import Animated, {
@@ -19,10 +20,13 @@ import Animated, {
   useSharedValue,
   withSpring,
   ZoomIn,
+  ZoomOut,
 } from "react-native-reanimated";
 import { useImmer } from "use-immer";
 import { FriendProps, mockFriends } from "../../../mockData";
 import SearchBar from "../SearchBar";
+import { Header } from "@react-navigation/elements";
+import { getContacts } from "@/socket/socketEvent";
 
 interface Todo {
   id: string;
@@ -43,6 +47,7 @@ const HomeGroupMdScreen = () => {
   const [selectedUser, setSelectedUsers] = useImmer<FriendProps[]>([]);
   const [text, onChangeText] = useState("");
   const [nameGroup, setNameGroup] = useState("");
+  const [contact, setContacts] = useState([]);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -64,14 +69,28 @@ const HomeGroupMdScreen = () => {
     });
   }, []);
 
-  const handleCreateGroup = () => {};
+  useEffect(() => {
+    getContacts(processGetContacts);
+    getContacts(null);
+    return () => {
+      getContacts(processGetContacts, true);
+    };
+  }, []);
 
+  const createGroup = () => {};
+
+  const processGetContacts = (res: any) => {
+    if (res.success) {
+      setContacts(res.data);
+      console.log("this is getContact", contact);
+    }
+  };
   return (
-    <View style={{ flex: 1, paddingHorizontal: 8, gap: 8 }}>
+    <View style={{ flex: 1, paddingHorizontal: 12, gap: 8 }}>
       <HeaderGroupScreen
         theme={theme}
         backPress={handleBack}
-        createPress={handleCreateGroup}
+        createPress={createGroup}
         styles={styles}
         isShowButton={!(selectedUser.length === 0)}
       />
@@ -89,20 +108,27 @@ const HomeGroupMdScreen = () => {
           style: { width: 96, height: 96, borderRadius: 100 },
         }}
       />
-      <View>
-        <Animated.FlatList
-          exiting={LinearTransition.duration(500)}
-          entering={LinearTransition.duration(500)}
-          contentContainerStyle={{ gap: 6, padding: 8 }}
-          data={selectedUser}
-          horizontal={true}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => {
-            return <RenderItem item={item} />;
-          }}
-        />
-      </View>
+      <Animated.View layout={LinearTransition.duration(500)}>
+        {selectedUser.length > 0 && (
+          <Animated.FlatList
+            contentContainerStyle={{ gap: 6, padding: 8 }}
+            data={selectedUser}
+            horizontal={true}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            itemLayoutAnimation={LinearTransition}
+            renderItem={({ item }) => {
+              return (
+                <AvatarItem
+                  theme={theme}
+                  item={item}
+                  onPress={() => handleUserToggle(item)}
+                />
+              );
+            }}
+          />
+        )}
+      </Animated.View>
       <SearchBar
         label={"New Group Name"}
         value={nameGroup}
@@ -125,31 +151,41 @@ const HomeGroupMdScreen = () => {
   );
 };
 
-interface renderItemProps {
+interface renderItemProps extends TouchableOpacityProps {
   item: FriendProps;
+  theme: ThemeType;
 }
 
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
-const RenderItem: FC<renderItemProps> = ({ item }) => {
+const AvatarItem: FC<renderItemProps> = ({ item, style, theme, ...rest }) => {
   const scale = useSharedValue(0);
 
   useEffect(() => {
     scale.value = withSpring(1, { damping: 30 });
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    marginRight: 6,
-  }));
-
   return (
-    <Animated.View style={animatedStyle} entering={ZoomIn}>
+    <AnimatedButton style={style} entering={ZoomIn} exiting={ZoomOut} {...rest}>
       <AnimatedImage
         source={{ uri: item.avatar }}
         style={{ width: 48, height: 48, borderRadius: 100 }}
       />
-    </Animated.View>
+
+      <Feather
+        style={{
+          position: "absolute",
+          right: -5,
+          top: -5,
+          borderRadius: 100,
+          padding: 2,
+          backgroundColor: theme.surfaceContainer,
+        }}
+        name="x"
+        color={theme.onSurface}
+        size={14}
+      />
+    </AnimatedButton>
   );
 };
 
@@ -161,7 +197,7 @@ interface HeaderGroupProps {
   isShowButton?: boolean;
 }
 
-const HeaderGroupScreen: FC<HeaderGroupProps> = ({
+export const HeaderGroupScreen: FC<HeaderGroupProps> = ({
   theme,
   backPress,
   createPress,

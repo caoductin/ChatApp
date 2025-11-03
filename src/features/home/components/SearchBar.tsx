@@ -4,9 +4,9 @@ import { Feather } from "@expo/vector-icons";
 import React, { FC, useRef, useState } from "react";
 import { StyleSheet, Text, TextInput, TextStyle } from "react-native";
 import Animated, {
+  Easing,
   FadeInRight,
   FadeOutRight,
-  LinearTransition,
   ZoomIn,
   ZoomOut,
 } from "react-native-reanimated";
@@ -66,8 +66,10 @@ const SearchBar: FC<SearchBarProps> = ({
           borderColor: "#b5b5b5ff",
           paddingVertical: isFocused ? 6.5 : 8,
           gap: 8,
+          zIndex: 1,
+          transitionProperty: ["borderWidth", "borderColor"],
+          transitionDuration: "200ms",
         }}
-        layout={LinearTransition}
       >
         {!isHiddenIcon && (
           <Feather
