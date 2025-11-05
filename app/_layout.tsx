@@ -25,10 +25,10 @@ const StackLayout = () => {
         <Stack.Screen name="(main)" />
       </Stack.Protected>
       <Stack.Protected guard={!isLogin}>
-        <Stack.Screen name="(auth)/login" />
+        <Stack.Screen name="index" />
         <Stack.Screen name="(auth)/welcome" />
         <Stack.Screen name="(auth)/register" />
-        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)/login" />
       </Stack.Protected>
     </Stack>
   );

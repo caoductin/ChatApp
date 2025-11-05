@@ -1,8 +1,12 @@
-import { mockFriends } from "@/src/features/mockData";
+import { Avatar } from "@/src/components/Avatar";
+import { ConversationProps } from "@/types";
 import { FC } from "react";
 import { FlatList, Image, Text, View } from "react-native";
 
-const ListFriend: FC = () => {
+interface ListFriendProps {
+  data: ConversationProps[];
+}
+const ListFriend: FC<ListFriendProps> = ({ data }) => {
   return (
     <FlatList
       contentContainerStyle={{
@@ -10,10 +14,10 @@ const ListFriend: FC = () => {
       }}
       horizontal={true}
       showsHorizontalScrollIndicator={false}
-      data={mockFriends}
-      keyExtractor={(item) => item.id}
+      data={data}
+      keyExtractor={(item) => item._id}
       renderItem={({ item }) => {
-        return <FriendItem name={item.name} avatar={item.avatar} />;
+        return <FriendItem name={item.name} avatar={item.avatar!} />;
       }}
     />
   );
@@ -27,9 +31,20 @@ interface FriendItemProps {
 const FriendItem: FC<FriendItemProps> = ({ name, avatar }) => {
   return (
     <View style={{ width: 60, alignItems: "center" }}>
-      <Image
+      {/* <Image
         source={{ uri: avatar }}
         style={{ width: 50, height: 50, borderRadius: 100 }}
+      /> */}
+      <Avatar
+        viewStyle={{ alignItems: "center", borderWidth: 0 }}
+        source={{ uri: avatar }}
+        style={{
+          width: 50,
+          height: 50,
+          borderRadius: 100,
+          borderWidth: 0,
+        }}
+        resizeMode="cover"
       />
       {name && (
         <Text

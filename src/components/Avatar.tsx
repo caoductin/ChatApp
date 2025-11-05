@@ -14,23 +14,31 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+
 interface AvatarProps extends ImageProps {
   viewStyle?: ViewStyle;
   onPress?: () => void;
 }
 
-// export const AvatarWithFallback = ({ uri }: { uri?: string }) => {
-//   const [error, setError] = useState(false);
+interface AvatarWithFallbackProps
+  extends Omit<ImageProps, "source" | "onError"> {
+  uri?: string;
+}
 
-//   return (
-//     <Image
-//       source={error || !uri || uri.trim() === "" ? defaultAvatar : { uri }}
-//       onError={() => setError(true)}
-//       style={{ width: 48, height: 48, borderRadius: 100 }}
-//       resizeMode="cover"
-//     />
-//   );
-// };
+export const AvatarWithFallback: FC<AvatarWithFallbackProps> = ({
+  uri,
+  ...rest
+}) => {
+  const [error, setError] = useState(false);
+  const defaultAvatar = require("@/assets/images/defaultAvatar.png");
+  return (
+    <Image
+      source={error || !uri || uri.trim() === "" ? defaultAvatar : { uri }}
+      onError={() => setError(true)}
+      {...rest}
+    />
+  );
+};
 
 export const AnimatedTouchable =
   Animated.createAnimatedComponent(TouchableOpacity);
@@ -75,8 +83,8 @@ export const Avatar: FC<AvatarProps> = ({
         style={[
           {
             borderColor: theme.onPrimary,
-            borderWidth: 8,
             borderRadius: 100,
+            borderWidth: 8,
             overflow: "hidden",
           },
           viewStyle,

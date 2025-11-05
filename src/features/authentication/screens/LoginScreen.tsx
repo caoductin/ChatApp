@@ -4,11 +4,12 @@ import ScreenWrapper from "@/src/components/ScreenWrapper";
 import Typo from "@/src/components/Typo";
 import { router, useNavigation } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { RegisterHeader } from "./components/RegisterHeader";
-import { RegisterWelcome } from "./components/RegisterWelcome";
-import { FormField } from "./components/TextField";
-import { useLoginForm } from "./useLoginForm";
+import { RegisterHeader } from "../components/RegisterHeader";
+import { RegisterWelcome } from "../components/RegisterWelcome";
+import { FormField } from "../components/TextField";
+import { useLoginForm } from "../useLoginForm";
 import { FC } from "react";
+import { useAppTheme } from "@/context/themeContext";
 
 const Login = () => {
   const {
@@ -20,6 +21,7 @@ const Login = () => {
     handleLogin,
     gotoRegister,
   } = useLoginForm();
+  const theme = useAppTheme();
   return (
     <ScreenWrapper showPattern={false} bgOpacity={1}>
       <RegisterHeader />
@@ -40,6 +42,7 @@ const Login = () => {
               icon="at-outline"
               label="Enter the email"
               error={error?.email}
+              theme={theme}
             />
             <FormField
               value={password}
@@ -47,6 +50,7 @@ const Login = () => {
               icon="lock-closed-outline"
               label="Enter the passwrod"
               error={error?.password}
+              theme={theme}
             />
           </View>
           <View

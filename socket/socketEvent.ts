@@ -22,8 +22,10 @@ function handleSocketEvent<T>(
   }
 }
 
-export const getContacts = <T>(payload: T | SocketEventHandler<T>, off = false) =>
-  handleSocketEvent("getContacts", payload, off);
+export const getContacts = <T>(
+  payload: T | SocketEventHandler<T>,
+  off = false
+) => handleSocketEvent("getContacts", payload, off);
 
 export const testSocket = (payload: any, off: boolean = false) => {
   const socket = getSocket();
@@ -59,18 +61,34 @@ export const updateProfile = (payload: any, off: boolean = false) => {
   }
 };
 
-// export const getContacts = (payload: any, off: boolean = false) => {
-//   const socket = getSocket();
-//   if (!socket) {
-//     console.log("Socket is not connected");
-//     return;
-//   }
+export const newConversation = (payload: any, off: boolean = false) => {
+  const socket = getSocket();
+  if (!socket) {
+    console.log("Socket is not connected");
+    return;
+  }
 
-//   if (off) {
-//     socket.off("getContacts", payload); // payload is the callback
-//   } else if (typeof payload == "function") {
-//     socket.on("getContacts", payload); // payload as callback for this event
-//   } else {
-//     socket.emit("getContacts", payload); // sending payload as data
-//   }
-// };
+  if (off) {
+    socket.off("newConversation", payload); // payload is the callback
+  } else if (typeof payload == "function") {
+    socket.on("newConversation", payload); // payload as callback for this event
+  } else {
+    socket.emit("newConversation", payload); // sending payload as data
+  }
+};
+
+export const getConversations = (payload: any, off: boolean = false) => {
+  const socket = getSocket();
+  if (!socket) {
+    console.log("Socket is not connected");
+    return;
+  }
+
+  if (off) {
+    socket.off("getConversations", payload); // payload is the callback
+  } else if (typeof payload == "function") {
+    socket.on("getConversations", payload); // payload as callback for this event
+  } else {
+    socket.emit("getConversations", payload); // sending payload as data
+  }
+};

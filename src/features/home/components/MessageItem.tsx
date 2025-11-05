@@ -1,20 +1,23 @@
 import { FC } from "react";
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import { mockMessages } from "../../mockData";
+import { format, formatDistance, formatRelative, subDays } from "date-fns";
+import { ConversationProps } from "@/types";
+import { Avatar, AvatarWithFallback } from "@/src/components/Avatar";
 
 interface MessagesItemProps {
-  name: string;
-  avatar?: string;
+  name: string | undefined;
+  avatar: string | undefined;
   time: string;
-  lastMessage: string;
+  lastMessage: string | undefined;
   unreadCount: number;
 }
 
 const MessageItem: FC<MessagesItemProps> = ({
-  name,
+  name = "Unknown",
   avatar,
   time,
-  lastMessage,
+  lastMessage = "Don't have message here",
   unreadCount,
 }) => {
   return (
@@ -25,8 +28,8 @@ const MessageItem: FC<MessagesItemProps> = ({
         alignItems: "center",
       }}
     >
-      <Image
-        source={{ uri: avatar }}
+      <AvatarWithFallback
+        uri={avatar}
         style={{ width: 40, height: 40, borderRadius: 100 }}
       />
       <View style={{ flex: 1, gap: 4 }}>
@@ -37,7 +40,12 @@ const MessageItem: FC<MessagesItemProps> = ({
           }}
         >
           <Text style={styles.name} children={name} />
-          <Text style={styles.message} children={time} />
+          <Text
+            style={styles.message}
+            children={formatDistance(time, new Date(), {
+              addSuffix: true,
+            })}
+          />
         </View>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text
@@ -57,19 +65,23 @@ const MessageItem: FC<MessagesItemProps> = ({
   );
 };
 
-export const ListMessage: FC = () => {
+interface ListMessageProps {
+  data?: ConversationProps[];
+}
+export const ListMessage: FC<ListMessageProps> = ({ data }) => {
   return (
     <FlatList
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ gap: 20, paddingBottom: 40 }}
-      data={mockMessages}
+      keyExtractor={(item) => item._id}
+      data={data}
       renderItem={({ item }) => (
         <MessageItem
           name={item.name}
-          time={item.time}
-          lastMessage={item.lastMessage}
-          unreadCount={item.unreadCount}
-          avatar={item.avatar}
+          time={item.createdAt}
+          lastMessage={item.lastMessage?.content}
+          unreadCount={0}
+          avatar={item.avatar || undefined}
         />
       )}
     />

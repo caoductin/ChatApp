@@ -26,10 +26,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const getToken = async () => {
       const token = await storage.getItem(Token);
-      
+
       if (token) {
-        const decode = jwtDecode<DecodedTokenProps>(token)
-        setUser(decode.user)
+        const decode = jwtDecode<DecodedTokenProps>(token);
+        setUser(decode.user);
         await connectSocket();
         setIsLogin(true);
       }
@@ -50,8 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     const response = await login(email, password);
     console.log(response);
-    await updateToken(response.token);
-    await connectSocket();
+    await Promise.all([updateToken(response.token), connectSocket()]);
     setIsLogin(true);
   };
 
@@ -62,16 +61,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     avatar?: string | null
   ) => {
     const response = await register(email, password, name, avatar);
-    await updateToken(response.token);
-    await connectSocket();
+    await Promise.all([updateToken(response.token), connectSocket()]);
   };
 
   const signOut = async () => {
     setUser(null);
     setToken(null);
     setIsLogin(false);
-    await storage.removeItem(Token);
-    await disConnectSocket();
+    await Promise.all([storage.removeItem(Token), disConnectSocket()]);
   };
 
   return (

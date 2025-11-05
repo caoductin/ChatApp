@@ -12,10 +12,10 @@ import {
   View,
 } from "react-native";
 import Animated from "react-native-reanimated";
-import { RegisterHeader } from "./components/RegisterHeader";
-import { RegisterWelcome } from "./components/RegisterWelcome";
-import { FormField } from "./components/TextField";
-import useRegisterForm from "./useRegisterForm";
+import { RegisterHeader } from "../components/RegisterHeader";
+import { RegisterWelcome } from "../components/RegisterWelcome";
+import { FormField } from "../components/TextField";
+import useRegisterForm from "../useRegisterForm";
 
 const Register = () => {
   const {

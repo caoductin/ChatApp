@@ -1,7 +1,7 @@
 import { ThemeType } from "@/context/themeContext";
 import { AnimatedTouchableOpacity } from "@/src/components";
 import { Avatar } from "@/src/components/Avatar";
-import { FriendProps } from "@/src/features/mockData";
+import { Contact } from "@/src/types/api";
 import { Feather } from "@expo/vector-icons";
 import { FC } from "react";
 import { FlatList, Text } from "react-native";
@@ -10,7 +10,6 @@ import {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { Contact } from "./HomeGroupModalScreen";
 
 interface ListChooseFriendProps {
   theme: ThemeType;

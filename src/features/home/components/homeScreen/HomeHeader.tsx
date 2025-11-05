@@ -27,15 +27,6 @@ const HeaderHome: FC = () => {
           <Feather name="facebook" size={20} color={"#1b1a1aff"} />
         </View>
         <IconView theme={theme} name="facebook" size={20} color={"#1b1a1aff"} />
-        {/* <View
-          style={{
-            padding: 8,
-            backgroundColor: "#e8e5e5ff",
-            borderRadius: 100,
-          }}
-        >
-          <Feather name="facebook" size={20} color={"#1b1a1aff"} />
-        </View> */}
       </View>
     </View>
   );
@@ -68,13 +59,5 @@ const getStyles = (theme: ThemeType) =>
       backgroundColor: theme.background,
     },
   });
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//   },
-// });
 
 export default HeaderHome;

@@ -1,56 +1,45 @@
+import { useAuth } from "@/context/authContext";
 import { ThemeType, useAppTheme } from "@/context/themeContext";
-import { getContacts } from "@/socket/socketEvent";
+import { uploadFileToCloudinary } from "@/services/imageService";
+import { getContacts, newConversation } from "@/socket/socketEvent";
 import { AnimatedTouchableOpacity } from "@/src/components";
 import { Avatar } from "@/src/components/Avatar";
+import { Contact, PopulatedConversation, ResponseApi } from "@/src/types/api";
 import { Feather } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Image,
+  ActivityIndicator,
+  Alert,
   StyleSheet,
   Text,
   TouchableOpacity,
-  TouchableOpacityProps,
   View,
 } from "react-native";
 import Animated, {
   LinearTransition,
   SlideInRight,
-  useSharedValue,
-  withSpring,
   ZoomIn,
   ZoomOut,
 } from "react-native-reanimated";
 import { useImmer } from "use-immer";
-import { FriendProps } from "../../../mockData";
 import SearchBar from "../SearchBar";
 import { ListChooseFriend } from "./ListChooseFriend";
 
-export interface Contact {
-  id: string;
-  name: string;
-  email: string;
-  avatar: string;
-}
-
-export interface GetContactsResponse {
-  success: boolean;
-  data: Contact[];
-}
 const HomeGroupMdScreen = () => {
   const theme = useAppTheme();
   const router = useRouter();
+  const { user } = useAuth();
   const styles = useMemo(() => getStyles(theme), [theme]);
   const [selectedUser, setSelectedUsers] = useImmer<Contact[]>([]);
-  const [text, onChangeText] = useState("");
-  const [nameGroup, setNameGroup] = useState("");
+  const [textSearch, onChangeText] = useState("");
+  const [groupName, setGroupName] = useState("");
+  const [image, setImage] = useState<string | null>(null);
   const [contact, setContacts] = useState<Contact[]>([]);
+  const [isLoading, setLoading] = useState(false);
   const { t } = useTranslation();
-
-  useEffect(() => {
-    console.log(selectedUser);
-  }, [selectedUser]);
 
   const handleBack = () => {
     router.back();
@@ -69,25 +58,78 @@ const HomeGroupMdScreen = () => {
 
   useEffect(() => {
     getContacts(processGetContacts);
+    newConversation(conversation);
     getContacts(null);
     return () => {
       getContacts(processGetContacts, true);
+      newConversation(conversation, true);
     };
   }, []);
 
-  useEffect(() => {
-    if (contact && contact.length > 0) {
-      console.log("State 'contact' đã được cập nhật:", contact);
+  const createGroup = async () => {
+    let avatarGroup;
+    setLoading(true);
+    if (image) {
+      const res = await uploadFileToCloudinary(image, "profiles");
+      if (res.success) {
+        avatarGroup = res.data;
+      }
     }
-  }, [contact]);
 
-  const createGroup = () => {};
+    if (selectedUser.length == 1) {
+      newConversation({
+        type: "direct",
+        participants: [user?.id, selectedUser[0].id],
+        name: groupName || t("New Group"),
+        avatar: avatarGroup,
+      });
+      return;
+    }
+    newConversation({
+      type: "group",
+      participants: [user?.id, ...selectedUser.map((user) => user.id)],
+      name: groupName || t("New Group"),
+      avatar: avatarGroup,
+    });
+  };
 
-  const processGetContacts = (res: GetContactsResponse) => {
+  const processGetContacts = (res: ResponseApi<Contact[]>) => {
     if (res.success) {
       setContacts(res.data);
     }
   };
+
+  const pickImage = async () => {
+    setLoading(true);
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.5,
+    });
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      setLoading(false);
+    }
+  };
+
+  const conversation = (res: ResponseApi<PopulatedConversation>) => {
+    setLoading(false);
+    if (res.success) {
+      router.back();
+    } else {
+      Alert.alert("Error", res.msg);
+    }
+  };
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1, paddingHorizontal: 12, gap: 8 }}>
       <HeaderGroupScreen
@@ -98,8 +140,11 @@ const HomeGroupMdScreen = () => {
         isShowButton={!(selectedUser.length === 0)}
       />
       <Avatar
+        onPress={pickImage}
         viewStyle={{ alignItems: "center" }}
-        source={{ uri: "" }}
+        source={{
+          uri: image || undefined,
+        }}
         style={{ width: 96, height: 96, borderRadius: 100 }}
         resizeMode="cover"
       />
@@ -148,14 +193,14 @@ const HomeGroupMdScreen = () => {
       </Animated.View>
       <SearchBar
         label={"New Group Name"}
-        value={nameGroup}
-        onChangeText={setNameGroup}
+        value={groupName}
+        onChangeText={setGroupName}
         isHiddenIcon={true}
         textInputStyle={{ height: 30 }}
       />
       <SearchBar
         label={"Find Member..."}
-        value={text}
+        value={textSearch}
         onChangeText={onChangeText}
         textInputStyle={{ height: 30 }}
       />
@@ -166,50 +211,6 @@ const HomeGroupMdScreen = () => {
         selectedContact={selectedUser}
       />
     </View>
-  );
-};
-
-interface renderItemProps extends TouchableOpacityProps {
-  item: FriendProps;
-  theme: ThemeType;
-}
-
-const AnimatedImage = Animated.createAnimatedComponent(Image);
-
-const AvatarItem: FC<renderItemProps> = ({ item, style, theme, ...rest }) => {
-  const scale = useSharedValue(0);
-
-  useEffect(() => {
-    scale.value = withSpring(1, { damping: 30 });
-  }, []);
-
-  return (
-    <AnimatedTouchableOpacity
-      style={style}
-      entering={ZoomIn}
-      exiting={ZoomOut}
-      {...rest}
-    >
-      <AnimatedImage
-        source={{ uri: item.avatar }}
-        defaultSource={require("@/assets/images/favicon.png")}
-        style={{ width: 48, height: 48, borderRadius: 100 }}
-      />
-
-      <Feather
-        style={{
-          position: "absolute",
-          right: -5,
-          top: -5,
-          borderRadius: 100,
-          padding: 2,
-          backgroundColor: theme.surfaceContainer,
-        }}
-        name="x"
-        color={theme.onSurface}
-        size={14}
-      />
-    </AnimatedTouchableOpacity>
   );
 };
 
