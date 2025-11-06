@@ -23,6 +23,17 @@ const StackLayout = () => {
     >
       <Stack.Protected guard={isLogin}>
         <Stack.Screen name="(main)" />
+
+        <Stack.Screen
+          name="(home)"
+          options={{ title: "Cuộc trò chuyện", headerShown: false }}
+        />
+        <Stack.Screen name="(profile)" options={{ title: "Ngôn ngữ" }} />
+        <Stack.Screen name="edit-profile" options={{ title: "Ngôn ngữ" }} />
+        <Stack.Screen
+          name="newGroupModal"
+          options={{ presentation: "modal" }}
+        />
       </Stack.Protected>
       <Stack.Protected guard={!isLogin}>
         <Stack.Screen name="index" />

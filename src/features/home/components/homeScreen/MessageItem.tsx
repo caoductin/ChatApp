@@ -1,9 +1,11 @@
 import { FC } from "react";
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
-import { mockMessages } from "../../mockData";
+import { mockMessages } from "../../../mockData";
 import { format, formatDistance, formatRelative, subDays } from "date-fns";
 import { ConversationProps } from "@/types";
 import { Avatar, AvatarWithFallback } from "@/src/components/Avatar";
+import { AnimatedButton } from "@/src/components/AnimatedButton";
+import { router } from "expo-router";
 
 interface MessagesItemProps {
   name: string | undefined;
@@ -21,12 +23,13 @@ const MessageItem: FC<MessagesItemProps> = ({
   unreadCount,
 }) => {
   return (
-    <View
+    <AnimatedButton
       style={{
         flexDirection: "row",
         gap: 12,
         alignItems: "center",
       }}
+      onPress={() => router.navigate("/(home)/conversation")}
     >
       <AvatarWithFallback
         uri={avatar}
@@ -61,7 +64,8 @@ const MessageItem: FC<MessagesItemProps> = ({
           )}
         </View>
       </View>
-    </View>
+      {/* </View> */}
+    </AnimatedButton>
   );
 };
 

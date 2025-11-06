@@ -12,19 +12,13 @@ export default function HomeLayout() {
         headerStyle: {
           backgroundColor: theme.surfaceBright,
         },
+        headerShown: false,
         contentStyle: {
           backgroundColor: theme.surfaceBright,
         },
       }}
     >
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="newGroupModal"
-        options={{
-          presentation: "modal",
-          headerShown: false,
-        }}
-      />
+      <Stack.Screen name="conversation"  />
     </Stack>
   );
 }

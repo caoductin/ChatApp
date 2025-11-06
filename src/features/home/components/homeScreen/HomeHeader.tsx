@@ -56,7 +56,6 @@ const getStyles = (theme: ThemeType) =>
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      backgroundColor: theme.background,
     },
   });
 

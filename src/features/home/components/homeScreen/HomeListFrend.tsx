@@ -31,10 +31,6 @@ interface FriendItemProps {
 const FriendItem: FC<FriendItemProps> = ({ name, avatar }) => {
   return (
     <View style={{ width: 60, alignItems: "center" }}>
-      {/* <Image
-        source={{ uri: avatar }}
-        style={{ width: 50, height: 50, borderRadius: 100 }}
-      /> */}
       <Avatar
         viewStyle={{ alignItems: "center", borderWidth: 0 }}
         source={{ uri: avatar }}

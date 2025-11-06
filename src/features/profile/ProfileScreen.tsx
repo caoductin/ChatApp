@@ -103,7 +103,7 @@ const HeaderProfile: FC = () => {
       />
       <TouchableOpacity
         onPress={() => {
-          router.navigate("/profile/edit-info");
+          router.navigate("/edit-info");
         }}
       >
         <View

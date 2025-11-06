@@ -4,7 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { PlatformPressable } from "@react-navigation/elements";
 import { useLinkBuilder, useTheme } from "@react-navigation/native";
-import { Tabs } from "expo-router";
+import { Tabs, usePathname } from "expo-router";
 import React, { FC } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
@@ -97,6 +97,15 @@ const MyTabBar: FC<BottomTabBarProps> = ({
 };
 
 export default function MainLayout() {
+  const pathName = usePathname();
+  // const isRootRoute = [
+  //   "/home",
+  //   "/status",
+  //   "/add",
+  //   "/call",
+  //   "/profile",
+  // ].includes(pathName);
+
   return (
     <Tabs tabBar={(props) => <MyTabBar {...props} />}>
       <Tabs.Screen

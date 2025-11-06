@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import HeaderHome from "../components/homeScreen/HomeHeader";
 import HeaderList from "../components/homeScreen/HomeHeaderList";
 import ListFriend from "../components/homeScreen/HomeListFrend";
-import { ListMessage } from "../components/MessageItem";
+import { ListMessage } from "../components/homeScreen/MessageItem";
 import SearchBar from "../components/SearchBar";
 import { ConversationProps, ResponseProps } from "@/types";
 import { getConversations } from "@/socket/socketEvent";
@@ -34,7 +34,7 @@ const HomeScreen = () => {
   };
 
   const hanleNewGroup = () => {
-    router.navigate("/(main)/home/newGroupModal");
+    router.navigate("/newGroupModal");
   };
   const [text, onChangeText] = useState("");
   return (

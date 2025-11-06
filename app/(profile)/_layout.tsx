@@ -19,6 +19,7 @@ export default function ProfileLayout() {
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="edit-info" />
+      <Stack.Screen name="language" />
     </Stack>
   );
 }
