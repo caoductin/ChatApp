@@ -16,16 +16,19 @@ import Animated, { LinearTransition } from "react-native-reanimated";
 import { MessageInputAction } from "./MessageInputAction";
 
 interface MessageSenderBarProps extends TextInputProps {
+  text: string;
+  onChangeText: (value: string) => void;
   onSendMessage: () => void;
 }
 
 export const MessageSenderBar: FC<MessageSenderBarProps> = ({
-  onSendMessage, 
+  text,
+  onChangeText,
+  onSendMessage,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
-  const [text, onChangeText] = useState<string>("");
   const theme = useAppTheme();
   const inputRef = useRef<TextInput>(null);
 

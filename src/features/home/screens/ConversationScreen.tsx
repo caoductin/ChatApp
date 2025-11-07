@@ -1,33 +1,47 @@
+import { useAuth } from "@/context/authContext";
 import { useAppTheme } from "@/context/themeContext";
 import { AvatarWithFallback } from "@/src/components/Avatar";
 import { Message, messagesMock } from "@/src/mock/MessageList";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { FC, useState } from "react";
-import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import Animated, {
+  LinearTransition,
+  SlideInDown,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MessageSenderBar } from "../components/conversationScreen/MessageSenderBar";
 
 const ConversationScreen = () => {
   const [messages, setMessages] = useState(messagesMock);
-  const [text, onChangeText] = useState(null);
+  const [text, onChangeText] = useState("");
+  const { user } = useAuth();
   const sendMessage = () => {
+    if (!user) {
+      return;
+    }
     const newMessage: Message = {
       id: Date.now().toString(),
-      senderId: "user1",
+      senderId: user?.id,
       receiverId: "user2",
-      content: "hello you ",
+      content: text,
       timestamp: new Date().toISOString(),
       type: "text",
       isRead: false,
     };
     setMessages([newMessage, ...messages]);
+    onChangeText("");
   };
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <HeaderConversation />
       <MessagesList data={messages} />
-      <MessageSenderBar onSendMessage={sendMessage} />
+      <MessageSenderBar
+        onSendMessage={sendMessage}
+        text={text}
+        onChangeText={onChangeText}
+      />
     </SafeAreaView>
   );
 };
@@ -58,7 +72,8 @@ interface MessagesListProps {
 
 const MessagesList: FC<MessagesListProps> = ({ data }) => {
   return (
-    <FlatList
+    <Animated.FlatList
+      layout={LinearTransition}
       showsVerticalScrollIndicator={false}
       inverted
       contentContainerStyle={{
@@ -70,7 +85,6 @@ const MessagesList: FC<MessagesListProps> = ({ data }) => {
       data={data}
       initialNumToRender={20}
       maxToRenderPerBatch={10}
-      windowSize={5}
       removeClippedSubviews={true}
       renderItem={({ item }) => <MessageItem item={item} />}
     />
@@ -84,7 +98,6 @@ interface MessageItemProps {
 const MessageItem: FC<MessageItemProps> = ({ item }) => {
   const isMe = item.senderId == "user1";
   const theme = useAppTheme();
-  console.log("this is is me", isMe);
   const mockUri = "https://randomuser.me/api/portraits/women/1.jpg";
 
   const avatarImage = (
@@ -95,7 +108,8 @@ const MessageItem: FC<MessageItemProps> = ({ item }) => {
   );
 
   return (
-    <View
+    <Animated.View
+      entering={SlideInDown}
       style={{
         justifyContent: isMe ? "flex-end" : "flex-start",
         alignItems: "center",
@@ -117,7 +131,7 @@ const MessageItem: FC<MessageItemProps> = ({ item }) => {
         </View>
       </View>
       {isMe && avatarImage}
-    </View>
+    </Animated.View>
   );
 };
 export default ConversationScreen;

@@ -22,7 +22,7 @@ export interface UserProps {
   email: string;
   name: string;
   avatar?: string | null;
-  id?: string;
+  id: string;
   // Add any additional fields from the token payload as needed
 }
 export interface UserDataProps {
