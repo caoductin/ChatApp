@@ -49,6 +49,9 @@ export const MessageSenderBar: FC<MessageSenderBarProps> = ({
         <View style={{ flexDirection: "row", flex: 1 }}>
           <Animated.View
             layout={LinearTransition}
+            onLayout={(e) => {
+              console.log("this ", e.nativeEvent.layout);
+            }}
             style={{
               flex: 1,
               flexDirection: "row",
@@ -57,18 +60,16 @@ export const MessageSenderBar: FC<MessageSenderBarProps> = ({
               alignItems: "center",
               borderWidth: 0.5,
               backgroundColor: `${theme.primaryContainer}40`,
-              borderRadius: 17.5,
-              paddingHorizontal: 8,
+              borderRadius: 22,
+              paddingHorizontal: 12,
               paddingVertical: 6,
             }}
           >
             <TextInput
               ref={inputRef}
-              onLayout={(e) => {
-                console.log("this ", e.nativeEvent.layout);
-              }}
               style={{
                 flex: 1,
+                paddingVertical: 6,
                 alignItems: "center",
                 alignContent: "center",
                 marginRight: 25,

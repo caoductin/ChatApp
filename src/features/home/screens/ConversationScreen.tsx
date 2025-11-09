@@ -1,10 +1,12 @@
 import { useAuth } from "@/context/authContext";
 import { useAppTheme } from "@/context/themeContext";
+import { newConversation, newMessages } from "@/socket/socketEvent";
 import { AvatarWithFallback } from "@/src/components/Avatar";
 import { Message, messagesMock } from "@/src/mock/MessageList";
+import { ResponseProps } from "@/types";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   LinearTransition,
@@ -17,6 +19,16 @@ const ConversationScreen = () => {
   const [messages, setMessages] = useState(messagesMock);
   const [text, onChangeText] = useState("");
   const { user } = useAuth();
+
+  useEffect(() => {
+    newMessages(newMessageHandler);
+    return () => newMessages(newMessageHandler, true);
+  }, []);
+
+  const newMessageHandler = (res: ResponseProps) => {
+    console.log("result ", res);
+  };
+
   const sendMessage = () => {
     if (!user) {
       return;
@@ -31,8 +43,19 @@ const ConversationScreen = () => {
       isRead: false,
     };
     setMessages([newMessage, ...messages]);
+    newMessages({
+      conversationId: "6909a932e48d472bc1f2b2b7",
+      sender: {
+        id: user.id,
+        name: user.name,
+        avatar: user.avatar,
+      },
+      content: text.trim(),
+      attachement: ""
+    });
     onChangeText("");
   };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <HeaderConversation />
@@ -114,6 +137,7 @@ const MessageItem: FC<MessageItemProps> = ({ item }) => {
         justifyContent: isMe ? "flex-end" : "flex-start",
         alignItems: "center",
         flexDirection: "row",
+        flex: 1,
         gap: 8,
       }}
     >
@@ -123,11 +147,14 @@ const MessageItem: FC<MessageItemProps> = ({ item }) => {
           backgroundColor: theme.onPrimary,
           padding: 8,
           borderRadius: 8,
+          flexShrink: 1,
         }}
       >
         <View>
           <Text>Hoang</Text>
-          <Text>{item.content}</Text>
+          <View style={{}}>
+            <Text>{item.content}</Text>
+          </View>
         </View>
       </View>
       {isMe && avatarImage}
