@@ -135,7 +135,7 @@ export type ConversationProps = {
 export type MessageProps = {
   id: string;
   sender: {
-    id: string;
+    _id: string;
     name: string;
     avatar: string | null;
   };
@@ -143,4 +143,6 @@ export type MessageProps = {
   attachement?: string | null;
   isMe?: boolean;
   createdAt: string;
-};
+  isSending?: boolean;
+  tempId?: string;
+}

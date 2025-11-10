@@ -1,11 +1,10 @@
-import { FC } from "react";
-import { FlatList, Image, StyleSheet, Text, View } from "react-native";
-import { mockMessages } from "../../../mockData";
-import { format, formatDistance, formatRelative, subDays } from "date-fns";
-import { ConversationProps } from "@/types";
-import { Avatar, AvatarWithFallback } from "@/src/components/Avatar";
 import { AnimatedButton } from "@/src/components/AnimatedButton";
+import { AvatarWithFallback } from "@/src/components/Avatar";
+import { ConversationProps } from "@/types";
+import { formatDistance , formatDate} from "date-fns";
 import { router } from "expo-router";
+import { FC } from "react";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 
 interface MessagesItemProps {
   name: string | undefined;
@@ -13,6 +12,7 @@ interface MessagesItemProps {
   time: string;
   lastMessage: string | undefined;
   unreadCount: number;
+  onPress: () => void;
 }
 
 const MessageItem: FC<MessagesItemProps> = ({
@@ -21,6 +21,7 @@ const MessageItem: FC<MessagesItemProps> = ({
   time,
   lastMessage = "Don't have message here",
   unreadCount,
+  onPress,
 }) => {
   return (
     <AnimatedButton
@@ -29,7 +30,7 @@ const MessageItem: FC<MessagesItemProps> = ({
         gap: 12,
         alignItems: "center",
       }}
-      onPress={() => router.navigate("/(home)/conversation")}
+      onPress={onPress}
     >
       <AvatarWithFallback
         uri={avatar}
@@ -64,7 +65,6 @@ const MessageItem: FC<MessagesItemProps> = ({
           )}
         </View>
       </View>
-      {/* </View> */}
     </AnimatedButton>
   );
 };
@@ -73,6 +73,18 @@ interface ListMessageProps {
   data?: ConversationProps[];
 }
 export const ListMessage: FC<ListMessageProps> = ({ data }) => {
+
+  const handledPress = (conversation: ConversationProps) => {
+    router.push({
+      pathname: "/(home)/[conversation]",
+      params: {
+        conversation: conversation._id,
+        name: "cao duc tin",
+        test: "12321 ",
+      },
+    });
+  };
+
   return (
     <FlatList
       showsVerticalScrollIndicator={false}
@@ -86,6 +98,7 @@ export const ListMessage: FC<ListMessageProps> = ({ data }) => {
           lastMessage={item.lastMessage?.content}
           unreadCount={0}
           avatar={item.avatar || undefined}
+          onPress={() => handledPress(item)}
         />
       )}
     />

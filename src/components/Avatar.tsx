@@ -22,7 +22,7 @@ interface AvatarProps extends ImageProps {
 
 interface AvatarWithFallbackProps
   extends Omit<ImageProps, "source" | "onError"> {
-  uri?: string;
+  uri?: string| null;
 }
 
 export const AvatarWithFallback: FC<AvatarWithFallbackProps> = ({

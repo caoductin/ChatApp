@@ -25,7 +25,7 @@ const HomeScreen = () => {
   );
 
   const processConversation = (res: ResponseProps) => {
-    // console.log("this is data", res.data);
+    console.log("this is data", res.data);
     if (res.success) {
       setConversations(res.data);
     } else {

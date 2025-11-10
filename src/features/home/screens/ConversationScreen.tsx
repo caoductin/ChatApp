@@ -1,57 +1,103 @@
 import { useAuth } from "@/context/authContext";
 import { useAppTheme } from "@/context/themeContext";
-import { newConversation, newMessages } from "@/socket/socketEvent";
+import { getMessages, newMessages } from "@/socket/socketEvent";
 import { AvatarWithFallback } from "@/src/components/Avatar";
-import { Message, messagesMock } from "@/src/mock/MessageList";
-import { ResponseProps } from "@/types";
+import { MessageProps, ResponseProps, UserProps } from "@/types";
 import { Feather } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { FC, useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { format } from "date-fns";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { FC, useEffect, useRef, useState } from "react";
+import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   LinearTransition,
   SlideInDown,
+  SlideInLeft,
+  SlideOutLeft,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
+import uuid from "react-native-uuid";
 import { MessageSenderBar } from "../components/conversationScreen/MessageSenderBar";
+import { ScrollView } from "react-native-reanimated/lib/typescript/Animated";
 
 const ConversationScreen = () => {
-  const [messages, setMessages] = useState(messagesMock);
+  const [messages, setMessages] = useState<MessageProps[]>([]);
+  const messagesRef = useRef<MessageProps[]>([]);
   const [text, onChangeText] = useState("");
   const { user } = useAuth();
+  const conversationData = useLocalSearchParams();
 
   useEffect(() => {
     newMessages(newMessageHandler);
-    return () => newMessages(newMessageHandler, true);
+    getMessages(getMessageHandler);
+    getMessages({ conversationId: conversationData.conversation });
+    return () => {
+      newMessages(newMessageHandler, true);
+      getMessages(getMessageHandler, true);
+    };
   }, []);
 
+  const getMessageHandler = (res: ResponseProps) => {
+    setMessages(res.data);
+    if (res.success) {
+      setMessages(res.data);
+    }
+  };
+
   const newMessageHandler = (res: ResponseProps) => {
-    console.log("result ", res);
+    if (res.success) {
+      const { tempId, createdAt } = res.data;
+      if (res.data.sender.id === user!.id) {
+        setMessages((prev) => {
+          const index = prev.findIndex((m) => m.tempId === tempId);
+          if (index !== -1) {
+            const updated = [...prev];
+            updated[index] = {
+              ...updated[index],
+              createdAt: createdAt,
+              isSending: false,
+            };
+            return updated;
+          }
+          return [...prev];
+        });
+        return;
+      }
+      if (res.data.conversationId == conversationData.conversation) {
+        setMessages((prev) => [res.data, ...prev]);
+      }
+    }
   };
 
   const sendMessage = () => {
     if (!user) {
       return;
     }
-    const newMessage: Message = {
+    const tempId = uuid.v4();
+    const newMessage: MessageProps = {
       id: Date.now().toString(),
-      senderId: user?.id,
-      receiverId: "user2",
+      sender: {
+        _id: user.id,
+        name: user.name,
+        avatar: user.avatar ?? "",
+      },
       content: text,
-      timestamp: new Date().toISOString(),
-      type: "text",
-      isRead: false,
+      attachement: null,
+      isMe: true,
+      createdAt: new Date().toISOString(),
+      isSending: true,
+      tempId: tempId,
     };
-    setMessages([newMessage, ...messages]);
+    setMessages((prev) => [newMessage, ...prev]);
     newMessages({
-      conversationId: "6909a932e48d472bc1f2b2b7",
+      conversationId: conversationData.conversation,
       sender: {
         id: user.id,
         name: user.name,
         avatar: user.avatar,
       },
       content: text.trim(),
-      attachement: ""
+      attachement: "",
+      tempId: tempId,
     });
     onChangeText("");
   };
@@ -90,10 +136,14 @@ const HeaderConversation: FC = () => {
 };
 
 interface MessagesListProps {
-  data: Message[];
+  data: MessageProps[];
 }
 
 const MessagesList: FC<MessagesListProps> = ({ data }) => {
+  const { user } = useAuth();
+  if (!user) {
+    return <View></View>;
+  }
   return (
     <Animated.FlatList
       layout={LinearTransition}
@@ -109,23 +159,32 @@ const MessagesList: FC<MessagesListProps> = ({ data }) => {
       initialNumToRender={20}
       maxToRenderPerBatch={10}
       removeClippedSubviews={true}
-      renderItem={({ item }) => <MessageItem item={item} />}
+      renderItem={({ item }) => <MessageItem item={item} user={user} />}
+      ListEmptyComponent={ListEmptyComponent}
     />
   );
 };
 
+const ListEmptyComponent = () => {
+  return (
+    <View>
+      <Text>The list is empty</Text>
+    </View>
+  );
+};
+
 interface MessageItemProps {
-  item: Message;
+  item: MessageProps;
+  user: UserProps;
 }
 
-const MessageItem: FC<MessageItemProps> = ({ item }) => {
-  const isMe = item.senderId == "user1";
+const MessageItem: FC<MessageItemProps> = ({ item, user }) => {
+  const isMe = item.sender._id === user.id;
   const theme = useAppTheme();
-  const mockUri = "https://randomuser.me/api/portraits/women/1.jpg";
 
   const avatarImage = (
     <AvatarWithFallback
-      uri={mockUri}
+      uri={user.avatar}
       style={{ width: 40, height: 40, borderRadius: 100 }}
     />
   );
@@ -142,21 +201,41 @@ const MessageItem: FC<MessageItemProps> = ({ item }) => {
       }}
     >
       {!isMe && avatarImage}
-      <View
+      <Animated.View
         style={{
-          backgroundColor: theme.onPrimary,
+          backgroundColor: isMe ? theme.inversePrimary : theme.onPrimary,
           padding: 8,
-          borderRadius: 8,
+          borderBottomLeftRadius: 12,
+          borderBottomEndRadius: 12,
+          borderTopLeftRadius: 12,
           flexShrink: 1,
+          maxWidth: "70%",
+          minWidth: "30%",
+          transitionDuration: "500ms",
         }}
       >
-        <View>
-          <Text>Hoang</Text>
-          <View style={{}}>
-            <Text>{item.content}</Text>
-          </View>
+        <Text children={user.name} />
+        <View style={{}}>
+          <Text>{item.content}</Text>
         </View>
-      </View>
+        <Animated.View
+          exiting={SlideOutLeft}
+          style={{
+            justifyContent: "flex-end",
+            alignItems: isMe ? "flex-start" : "flex-end",
+            transitionProperty: "alignItem",
+            transitionDuration: "500ms",
+            transitionBehavior: "normal",
+          }}
+        >
+          <Text
+            style={{ fontSize: 10, color: theme.inverseSurface }}
+            children={
+              item.isSending ? "sending..." : format(item.createdAt, "hh:mm a")
+            }
+          />
+        </Animated.View>
+      </Animated.View>
       {isMe && avatarImage}
     </Animated.View>
   );
