@@ -1,110 +1,117 @@
 import { useAuth } from "@/context/authContext";
 import { useAppTheme } from "@/context/themeContext";
-import { getMessages, newMessages } from "@/socket/socketEvent";
 import { AvatarWithFallback } from "@/src/components/Avatar";
-import { MessageProps, ResponseProps, UserProps } from "@/types";
+import { MessageProps, UserProps } from "@/types";
 import { Feather } from "@expo/vector-icons";
 import { format } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { FC, useEffect, useRef, useState } from "react";
-import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import { FC } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   LinearTransition,
   SlideInDown,
-  SlideInLeft,
   SlideOutLeft,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import uuid from "react-native-uuid";
 import { MessageSenderBar } from "../components/conversationScreen/MessageSenderBar";
-import { ScrollView } from "react-native-reanimated/lib/typescript/Animated";
+import { useConversationMessages } from "../hooks/useConversationMessages";
 
 const ConversationScreen = () => {
-  const [messages, setMessages] = useState<MessageProps[]>([]);
-  const messagesRef = useRef<MessageProps[]>([]);
-  const [text, onChangeText] = useState("");
+  // const [messages, setMessages] = useState<MessageProps[]>([]);
+  // const [text, onChangeText] = useState("");
   const { user } = useAuth();
-  const conversationData = useLocalSearchParams();
+  const { conversation, chatName } = useLocalSearchParams<{
+    conversation: string;
+    chatName: string;
+  }>();
+  const { messages, onChangeText, text, sendMessage } = useConversationMessages(
+    user,
+    conversation as string
+  );
 
-  useEffect(() => {
-    newMessages(newMessageHandler);
-    getMessages(getMessageHandler);
-    getMessages({ conversationId: conversationData.conversation });
-    return () => {
-      newMessages(newMessageHandler, true);
-      getMessages(getMessageHandler, true);
-    };
-  }, []);
+  // useEffect(() => {
+  //   console.log("this is conversation", conversation);
+  // }, []);
 
-  const getMessageHandler = (res: ResponseProps) => {
-    setMessages(res.data);
-    if (res.success) {
-      setMessages(res.data);
-    }
-  };
+  // useEffect(() => {
+  //   newMessages(newMessageHandler);
+  //   getMessages(getMessageHandler);
+  //   getMessages({ conversationId: conversation });
+  //   return () => {
+  //     newMessages(newMessageHandler, true);
+  //     getMessages(getMessageHandler, true);
+  //   };
+  // }, []);
 
-  const newMessageHandler = (res: ResponseProps) => {
-    if (res.success) {
-      const { tempId, createdAt } = res.data;
-      if (res.data.sender.id === user!.id) {
-        setMessages((prev) => {
-          const index = prev.findIndex((m) => m.tempId === tempId);
-          if (index !== -1) {
-            const updated = [...prev];
-            updated[index] = {
-              ...updated[index],
-              createdAt: createdAt,
-              isSending: false,
-            };
-            return updated;
-          }
-          return [...prev];
-        });
-        return;
-      }
-      if (res.data.conversationId == conversationData.conversation) {
-        setMessages((prev) => [res.data, ...prev]);
-      }
-    }
-  };
+  // const getMessageHandler = (res: ResponseProps) => {
+  //   setMessages(res.data);
+  //   if (res.success) {
+  //     setMessages(res.data);
+  //   }
+  // };
 
-  const sendMessage = () => {
-    if (!user) {
-      return;
-    }
-    const tempId = uuid.v4();
-    const newMessage: MessageProps = {
-      id: Date.now().toString(),
-      sender: {
-        _id: user.id,
-        name: user.name,
-        avatar: user.avatar ?? "",
-      },
-      content: text,
-      attachement: null,
-      isMe: true,
-      createdAt: new Date().toISOString(),
-      isSending: true,
-      tempId: tempId,
-    };
-    setMessages((prev) => [newMessage, ...prev]);
-    newMessages({
-      conversationId: conversationData.conversation,
-      sender: {
-        id: user.id,
-        name: user.name,
-        avatar: user.avatar,
-      },
-      content: text.trim(),
-      attachement: "",
-      tempId: tempId,
-    });
-    onChangeText("");
-  };
+  // const newMessageHandler = (res: ResponseProps) => {
+  //   if (res.success) {
+  //     const { tempId, createdAt } = res.data;
+  //     if (res.data.sender.id === user!.id) {
+  //       setMessages((prev) => {
+  //         const index = prev.findIndex((m) => m.tempId === tempId);
+  //         if (index !== -1) {
+  //           const updated = [...prev];
+  //           updated[index] = {
+  //             ...updated[index],
+  //             createdAt: createdAt,
+  //             isSending: false,
+  //           };
+  //           return updated;
+  //         }
+  //         return [...prev];
+  //       });
+  //       return;
+  //     }
+  //     if (res.data.conversationId == conversation) {
+  //       setMessages((prev) => [res.data, ...prev]);
+  //     }
+  //   }
+  // };
+
+  // const sendMessage = () => {
+  //   if (!user) {
+  //     return;
+  //   }
+  //   const tempId = uuid.v4();
+  //   const newMessage: MessageProps = {
+  //     id: Date.now().toString(),
+  //     sender: {
+  //       _id: user.id,
+  //       name: user.name,
+  //       avatar: user.avatar ?? "",
+  //     },
+  //     content: text,
+  //     attachement: null,
+  //     isMe: true,
+  //     createdAt: new Date().toISOString(),
+  //     isSending: true,
+  //     tempId: tempId,
+  //   };
+  //   setMessages((prev) => [newMessage, ...prev]);
+  //   newMessages({
+  //     conversationId: conversation,
+  //     sender: {
+  //       id: user.id,
+  //       name: user.name,
+  //       avatar: user.avatar,
+  //     },
+  //     content: text.trim(),
+  //     attachement: "",
+  //     tempId: tempId,
+  //   });
+  //   onChangeText("");
+  // };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <HeaderConversation />
+      <HeaderConversation chatName={chatName} />
       <MessagesList data={messages} />
       <MessageSenderBar
         onSendMessage={sendMessage}
@@ -115,7 +122,7 @@ const ConversationScreen = () => {
   );
 };
 
-const HeaderConversation: FC = () => {
+const HeaderConversation: FC<{ chatName: string }> = ({ chatName }) => {
   const router = useRouter();
   const theme = useAppTheme();
   return (
@@ -127,8 +134,12 @@ const HeaderConversation: FC = () => {
         paddingHorizontal: 8,
       }}
     >
-      <TouchableOpacity onPress={router.back}>
+      <TouchableOpacity
+        onPress={router.back}
+        style={{ flexDirection: "row", alignItems: "center" }}
+      >
         <Feather name="chevron-left" size={25} />
+        <Text children={chatName} />
       </TouchableOpacity>
       <Feather name="phone-call" size={20} />
     </View>

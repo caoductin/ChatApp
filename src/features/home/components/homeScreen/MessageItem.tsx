@@ -1,7 +1,7 @@
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { AvatarWithFallback } from "@/src/components/Avatar";
 import { ConversationProps } from "@/types";
-import { formatDistance , formatDate} from "date-fns";
+import { formatDistance } from "date-fns";
 import { router } from "expo-router";
 import { FC } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
@@ -73,14 +73,12 @@ interface ListMessageProps {
   data?: ConversationProps[];
 }
 export const ListMessage: FC<ListMessageProps> = ({ data }) => {
-
   const handledPress = (conversation: ConversationProps) => {
     router.push({
       pathname: "/(home)/[conversation]",
       params: {
         conversation: conversation._id,
-        name: "cao duc tin",
-        test: "12321 ",
+        chatName: conversation.name,
       },
     });
   };
