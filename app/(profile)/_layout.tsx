@@ -1,7 +1,7 @@
 import { useAppTheme } from "@/context/themeContext";
 import { useTheme } from "@react-navigation/native";
 import { Stack } from "expo-router";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 
 export default function ProfileLayout() {
   const theme = useAppTheme();
@@ -15,10 +15,10 @@ export default function ProfileLayout() {
         contentStyle: {
           backgroundColor: theme.surfaceBright,
         },
+        headerBackVisible: true,
       }}
     >
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="edit-info" />
+      <Stack.Screen name="edit-info" options={{ headerShown: false }} />
       <Stack.Screen name="language" />
     </Stack>
   );

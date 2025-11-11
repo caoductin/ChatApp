@@ -97,14 +97,6 @@ const MyTabBar: FC<BottomTabBarProps> = ({
 };
 
 export default function MainLayout() {
-  const pathName = usePathname();
-  // const isRootRoute = [
-  //   "/home",
-  //   "/status",
-  //   "/add",
-  //   "/call",
-  //   "/profile",
-  // ].includes(pathName);
 
   return (
     <Tabs tabBar={(props) => <MyTabBar {...props} />}>

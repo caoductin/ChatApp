@@ -2,9 +2,11 @@ import { useAuth } from "@/context/authContext";
 import { ThemeType, useAppTheme } from "@/context/themeContext";
 import { uploadFileToCloudinary } from "@/services/imageService";
 import { updateProfile } from "@/socket/socketEvent";
+import { Feather } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
+import { router, useRouter } from "expo-router";
 import { FC, useEffect, useReducer } from "react";
+import { useEditProfile } from "./hooks/useEditProfile";
 import {
   Alert,
   Image,
@@ -22,6 +24,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const formReducer = (state: any, action: any) => {
   return { ...state, [action.field]: action.value };
@@ -30,108 +33,49 @@ const formReducer = (state: any, action: any) => {
 export const EditProfileScreen: FC = () => {
   const { user, updateToken } = useAuth();
   const theme = useAppTheme();
-  const router = useRouter();
-  const mockUri = "https://randomuser.me/api/portraits/women/2.jpg";
-  const [formState, dispatch] = useReducer(formReducer, {
-    name: "",
-    email: "",
-    oldPassword: "",
-    newPassword: "",
-  });
-
-  const handleChange = (field: string, value: string) => {
-    dispatch({ field, value });
-  };
-
-  useEffect(() => {
-    if (user) {
-      console.log("this is user", user);
-      dispatch({ field: "name", value: user.name || "" });
-      dispatch({ field: "avatar", value: user.avatar || "" });
-      dispatch({ field: "email", value: user.email || "" });
-    }
-  }, [user]);
-
-  useEffect(() => {
-    updateProfile(processUpdateProfile);
-    return () => {
-      updateProfile(processUpdateProfile, true);
-    };
-  }, []);
-
-  useEffect(() => {
-    console.log("form data", formState);
-  }, [formState]);
-
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.5,
-    });
-    if (!result.canceled) {
-      console.log(result.assets[0].uri);
-      dispatch({ field: "avatar", value: result.assets[0].uri });
-    }
-  };
-
-  const processUpdateProfile = (res: any) => {
-    console.log("this is res from socket", res);
-    if (res.success) {
-      updateToken(res.data.newToken);
-      router.back();
-    } else {
-      Alert.alert("Failed", res.msg);
-    }
-  };
-
-  const hanleSubmitProfile = async () => {
-    if (!formState.name.trim() || !formState) {
-      Alert.alert("Error", "Please enter the name");
-      return;
-    }
-    const data = {
-      name: formState.name,
-      avatar: formState.avatar,
-    };
-    console.log("this is log", data);
-
-    if (formState.avatar) {
-      const res = await uploadFileToCloudinary(formState.avatar, "profiles");
-      console.log("this is data upload to cloudinary", res);
-      data.avatar = res.data;
-    }
-    updateProfile(data);
-  };
+  const { formState, handleChange, handleSubmitProfile, pickImage } =
+    useEditProfile(user, updateToken);
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 16 }}>
-      <ScrollView>
-        <Animated.View style={{ alignItems: "center" }}>
-          <Avatar uri={formState.avatar} onPress={pickImage} />
-        </Animated.View>
-        <View style={{ flex: 1, gap: 16 }}>
-          <View style={{ gap: 4 }}>
-            <Text style={{ fontWeight: "600" }}>Account Infomation</Text>
-            <AcountInfoView
-              name={formState.name}
-              email={formState.email}
-              onChange={handleChange}
-            />
-          </View>
+    <SafeAreaView style={{ flex: 1 }}>
+      <HeaderProfile />
+      <View style={{ flex: 1, paddingHorizontal: 16 }}>
+        <ScrollView>
+          <Animated.View style={{ alignItems: "center" }}>
+            <Avatar uri={formState.avatar} onPress={pickImage} />
+          </Animated.View>
+          <View style={{ flex: 1, gap: 16 }}>
+            <View style={{ gap: 4 }}>
+              <Text style={{ fontWeight: "600" }}>Account Infomation</Text>
+              <AcountInfoView
+                name={formState.name}
+                email={formState.email}
+                onChange={handleChange}
+              />
+            </View>
 
-          <View style={{ gap: 4 }}>
-            <Text style={{ fontWeight: "600" }}>Password Infomation</Text>
-            <PasswordView
-              oldPassword={formState.oldPassword}
-              newPassword={formState.newPassword}
-              onChange={handleChange}
-            />
+            <View style={{ gap: 4 }}>
+              <Text style={{ fontWeight: "600" }}>Password Infomation</Text>
+              <PasswordView
+                oldPassword={formState.oldPassword}
+                newPassword={formState.newPassword}
+                onChange={handleChange}
+              />
+            </View>
+            <FooterProfile onpress={handleSubmitProfile} theme={theme} />
           </View>
-          <FooterProfile onpress={hanleSubmitProfile} theme={theme} />
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const HeaderProfile: FC = () => {
+  return (
+    <View>
+      <TouchableOpacity onPress={router.back}>
+        <Feather name="chevron-left" size={30} />
+      </TouchableOpacity>
     </View>
   );
 };

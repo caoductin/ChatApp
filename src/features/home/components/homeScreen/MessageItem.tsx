@@ -75,9 +75,9 @@ interface ListMessageProps {
 export const ListMessage: FC<ListMessageProps> = ({ data }) => {
   const handledPress = (conversation: ConversationProps) => {
     router.push({
-      pathname: "/(home)/[conversation]",
+      pathname: "/(home)/conversation/[id]",
       params: {
-        conversation: conversation._id,
+        id: conversation._id,
         chatName: conversation.name,
       },
     });

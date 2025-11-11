@@ -4,44 +4,46 @@ import { Stack } from "expo-router";
 import { FC, ReactNode } from "react";
 import { View } from "react-native";
 import "../src/localize/i18next";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const StackLayout = () => {
   const { isLogin } = useAuth();
   const theme = useAppTheme();
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        headerStyle: {
-          backgroundColor: theme.surfaceBright,
-        },
-        contentStyle: {
-          backgroundColor: theme.surfaceBright,
-        },
-      }}
-    >
-      <Stack.Protected guard={isLogin}>
-        <Stack.Screen name="(main)" />
+    <GestureHandlerRootView>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          headerStyle: {
+            backgroundColor: theme.surfaceBright,
+          },
+          contentStyle: {
+            backgroundColor: theme.surfaceBright,
+          },
+        }}
+      >
+        <Stack.Protected guard={isLogin}>
+          <Stack.Screen name="(main)" />
 
-        <Stack.Screen
-          name="(home)"
-          options={{ title: "Cuộc trò chuyện", headerShown: false }}
-        />
-        <Stack.Screen name="(profile)" options={{ title: "Ngôn ngữ" }} />
-        <Stack.Screen name="edit-profile" options={{ title: "Ngôn ngữ" }} />
-        <Stack.Screen
-          name="newGroupModal"
-          options={{ presentation: "modal" }}
-        />
-      </Stack.Protected>
-      <Stack.Protected guard={!isLogin}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(auth)/welcome" />
-        <Stack.Screen name="(auth)/register" />
-        <Stack.Screen name="(auth)/login" />
-      </Stack.Protected>
-    </Stack>
+          <Stack.Screen
+            name="(home)"
+            options={{ title: "Cuộc trò chuyện", headerShown: false }}
+          />
+          <Stack.Screen name="(profile)" options={{ title: "Ngôn ngữ" }} />
+          <Stack.Screen
+            name="newGroupModal"
+            options={{ presentation: "modal" }}
+          />
+        </Stack.Protected>
+        <Stack.Protected guard={!isLogin}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(auth)/welcome" />
+          <Stack.Screen name="(auth)/register" />
+          <Stack.Screen name="(auth)/login" />
+        </Stack.Protected>
+      </Stack>
+    </GestureHandlerRootView>
   );
 };
 
