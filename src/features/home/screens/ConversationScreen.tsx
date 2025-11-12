@@ -1,11 +1,13 @@
 import { useAuth } from "@/context/authContext";
 import { useAppTheme } from "@/context/themeContext";
 import { MessageProps } from "@/types";
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FC, useState } from "react";
 import {
+  Button,
   Dimensions,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -17,6 +19,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MessageItem } from "../components/conversationScreen/MessageItem";
 import { MessageSenderBar } from "../components/conversationScreen/MessageSenderBar";
 import { useConversationMessages } from "../hooks/useConversationMessages";
+import MessageReply from "../components/conversationScreen/MessageReply";
+import { useImageGalleryToggle } from "../hooks/useGalaryToggle";
+import { CustomGallerySheet } from "../components/conversationScreen/CustomGalarySheet";
+import { GalaryImageView } from "../components/imageGalary/GalaryImageView";
 
 const SWIPE_THRESHOLD = 80;
 const { width } = Dimensions.get("window");
@@ -31,16 +37,19 @@ const ConversationScreen = () => {
     user,
     id
   );
+  const { isGalleryVisible, toggleGallery, initialHeight, maxHeight } =
+    useImageGalleryToggle();
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <HeaderConversation chatName={chatName} />
+      {/* <HeaderConversation chatName={chatName} />
       <MessagesList data={messages} />
       <MessageSenderBar
         onSendMessage={sendMessage}
         text={text}
         onChangeText={onChangeText}
-      />
+      /> */}
+      <GalaryImageView/> 
     </SafeAreaView>
   );
 };
@@ -75,7 +84,7 @@ interface MessagesListProps {
 
 const MessagesList: FC<MessagesListProps> = ({ data }) => {
   const { user } = useAuth();
-  const [replyingTo, setReplyingTo] = useState<MessageProps>();
+  const [replyingTo, setReplyingTo] = useState<MessageProps | null>(null);
 
   const onSwipeToReply = (item: MessageProps) => {
     setReplyingTo(item);
@@ -109,20 +118,17 @@ const MessagesList: FC<MessagesListProps> = ({ data }) => {
         )}
         ListEmptyComponent={ListEmptyComponent}
       />
-      {replyingTo &&<ReplyMessage item={replyingTo}/>}
+      {replyingTo && (
+        <MessageReply
+          item={replyingTo}
+          onPress={() => {
+            setReplyingTo(null);
+          }}
+        />
+      )}
     </GestureHandlerRootView>
   );
 };
-interface ReplyMessageProps {
-  item: MessageProps
-}
-const ReplyMessage:FC<ReplyMessageProps> = ({item}) => {
-  return (
-    <View>
-      <Text children={item.content}/>
-    </View>
-  )
-}
 
 const ListEmptyComponent = () => {
   return (
@@ -171,3 +177,26 @@ const styles = StyleSheet.create({
 });
 
 export default ConversationScreen;
+const demoStyles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  inputBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderTopWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "white",
+  },
+  textInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 20,
+    padding: 8,
+    marginLeft: 10,
+  },
+  galleryContent: {
+    alignItems: "center",
+    height: 100, // Chiều cao nội dung cuộn ngang
+  },
+});
